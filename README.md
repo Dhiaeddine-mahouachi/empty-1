@@ -1,5 +1,7 @@
 # AuraPops
 
+Status: standalone codebase.
+
 Standalone AuraPops application.
 
 This repository is intentionally independent from AuraDigital. It contains its own:
