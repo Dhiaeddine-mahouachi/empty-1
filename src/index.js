@@ -18,16 +18,26 @@ export default {
       const url = new URL(request.url);
       let response;
 
-      if (url.pathname === "/admin" || url.pathname === "/admin/") {
+      if (url.pathname === "/" || url.pathname === "/aurapops" || url.pathname === "/aurapops/") {
+        response = await env.ASSETS.fetch(new Request(new URL("/index.html", url), request));
+        return secure(response, request);
+      }
+      if (url.pathname === "/aurapops/admin" || url.pathname === "/aurapops/admin/") {
         response = await env.ASSETS.fetch(new Request(new URL("/admin.html", url), request));
         return secure(response, request);
       }
-      if (/^\/p\/[a-z0-9-]+$/i.test(url.pathname)) {
+      if (/^\/pops\/[a-z0-9-]+$/i.test(url.pathname)) {
         response = await env.ASSETS.fetch(new Request(new URL("/view.html", url), request));
         return secure(response, request);
       }
-      if (url.pathname.startsWith("/api/")) {
+      if (url.pathname.startsWith("/api/aurapops/") || url.pathname === "/api/aurapops") {
         response = await api(request, env);
+        return secure(response, request);
+      }
+      if (url.pathname.startsWith("/aurapops/")) {
+        const assetUrl = new URL(url);
+        assetUrl.pathname = url.pathname.slice("/aurapops".length) || "/index.html";
+        response = await env.ASSETS.fetch(new Request(assetUrl, request));
         return secure(response, request);
       }
 
@@ -99,7 +109,7 @@ function secure(response, request) {
   } else if(!h.has("Content-Security-Policy")) {
     h.set("Content-Security-Policy","default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
   }
-  if(new URL(request.url).pathname.startsWith("/api/admin/")) h.set("Cache-Control","no-store");
+  if(new URL(request.url).pathname.startsWith("/api/aurapops/admin/")) h.set("Cache-Control","no-store");
   return new Response(response.body,{status:response.status,statusText:response.statusText,headers:h});
 }
 async function requestPolicy(request, env) {
@@ -111,7 +121,7 @@ async function requestPolicy(request, env) {
   let path; try { path=decodeURIComponent(url.pathname); } catch { return json({error:"Invalid path."},400); }
   if(path.includes("\\") || /[\x00-\x1f]/.test(path) || path.split("/").includes("..")) return json({error:"Invalid path."},400);
   if(!["GET","HEAD","POST","PATCH","OPTIONS"].includes(request.method)) return json({error:"Method not allowed."},405);
-  if(url.pathname.startsWith("/api/") && !env.DB) return json({error:"Service unavailable."},503);
+  if((url.pathname.startsWith("/api/aurapops/") || url.pathname === "/api/aurapops") && !env.DB) return json({error:"Service unavailable."},503);
   return null;
 }
 
@@ -178,9 +188,9 @@ function mapPop(row,origin,includeState=false) {
     id:row.id,slug:row.slug,title:row.title,subtitle:row.subtitle,
     backgroundMode:row.background_mode,backgroundColor:row.background_color,cardColor:row.card_color,
     textColor:row.text_color,accentColor:row.accent_color,links,
-    avatarUrl:row.avatar_image_id?`${origin}/api/images/${row.avatar_image_id}`:"",
-    backgroundImageUrl:row.background_image_id?`${origin}/api/images/${row.background_image_id}`:"",
-    publicUrl:`${origin}/p/${row.slug}`,updatedAt:row.updated_at
+    avatarUrl:row.avatar_image_id?`${origin}/api/aurapops/images/${row.avatar_image_id}`:"",
+    backgroundImageUrl:row.background_image_id?`${origin}/api/aurapops/images/${row.background_image_id}`:"",
+    publicUrl:`${origin}/pops/${row.slug}`,updatedAt:row.updated_at
   };
   if(includeState){pop.status=row.status;pop.paymentStatus=row.payment_status;pop.adminNote=row.admin_note||"";}
   return pop;
@@ -224,22 +234,22 @@ async function api(request,env) {
   await ensureSchema(env.DB);
   const url=new URL(request.url);
 
-  if(url.pathname==="/api/health"&&request.method==="GET") return json({ok:true,service:"aurapops"});
-  if(url.pathname==="/api/admin/login"&&request.method==="POST") return adminLogin(request,env);
-  if(url.pathname==="/api/admin/logout"&&request.method==="POST") {
+  if(url.pathname==="/api/aurapops/health"&&request.method==="GET") return json({ok:true,service:"aurapops"});
+  if(url.pathname==="/api/aurapops/admin/login"&&request.method==="POST") return adminLogin(request,env);
+  if(url.pathname==="/api/aurapops/admin/logout"&&request.method==="POST") {
     const cookie=parseCookies(request)[ADMIN_COOKIE]||"";
     if(cookie) await env.DB.prepare("DELETE FROM aurapops_admin_sessions WHERE token_hash=?").bind(await hash(cookie)).run();
     return json({ok:true},200,{"Set-Cookie":`${ADMIN_COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0`,"Cache-Control":"no-store"});
   }
-  if(url.pathname==="/api/admin/session"&&request.method==="GET") return json({authenticated:await adminSession(request,env)},200,{"Cache-Control":"no-store"});
+  if(url.pathname==="/api/aurapops/admin/session"&&request.method==="GET") return json({authenticated:await adminSession(request,env)},200,{"Cache-Control":"no-store"});
 
-  if(url.pathname.startsWith("/api/admin/")) {
+  if(url.pathname.startsWith("/api/aurapops/admin/")) {
     if(!await adminSession(request,env)) return json({error:"Unauthorized."},401,{"Cache-Control":"no-store"});
-    if(url.pathname==="/api/admin/pops"&&request.method==="GET") {
+    if(url.pathname==="/api/aurapops/admin/pops"&&request.method==="GET") {
       const rows=await env.DB.prepare("SELECT * FROM aurapops ORDER BY created_at DESC LIMIT 200").all();
       return json({items:(rows.results||[]).map(r=>mapPop(r,url.origin,true))},200,{"Cache-Control":"no-store"});
     }
-    const m=url.pathname.match(/^\/api\/admin\/pops\/([a-f0-9-]+)$/i);
+    const m=url.pathname.match(/^\/api\/aurapops\/admin\/pops\/([a-f0-9-]+)$/i);
     if(m&&request.method==="PATCH") {
       if(!sameOrigin(request)) return json({error:"Invalid request origin."},403);
       const current=await env.DB.prepare("SELECT * FROM aurapops WHERE id=? LIMIT 1").bind(m[1]).first();
@@ -258,7 +268,7 @@ async function api(request,env) {
     return json({error:"Not found."},404);
   }
 
-  const imageMatch=url.pathname.match(/^\/api\/images\/([a-f0-9-]+)$/i);
+  const imageMatch=url.pathname.match(/^\/api\/aurapops\/images\/([a-f0-9-]+)$/i);
   if(imageMatch&&["GET","HEAD"].includes(request.method)) {
     const image=await env.DB.prepare("SELECT i.*,p.status,p.payment_status,p.owner_token_hash FROM aurapop_images i JOIN aurapops p ON p.id=i.pop_id WHERE i.id=? LIMIT 1").bind(imageMatch[1]).first();
     if(!image) return new Response("Not found.",{status:404});
@@ -274,13 +284,13 @@ async function api(request,env) {
     return new Response(request.method==="HEAD"?null:image.image_bytes,{status:200,headers:{"Content-Type":image.content_type,"Cache-Control":allowed&&image.status==="approved"?"public, max-age=3600":"no-store"}});
   }
 
-  const publicMatch=url.pathname.match(/^\/api\/public\/([a-z0-9-]+)$/i);
+  const publicMatch=url.pathname.match(/^\/api\/aurapops\/public\/([a-z0-9-]+)$/i);
   if(publicMatch&&request.method==="GET") {
     const row=await env.DB.prepare("SELECT * FROM aurapops WHERE slug=? AND status='approved' AND payment_status='paid' LIMIT 1").bind(publicMatch[1]).first();
     return row?json({pop:mapPop(row,url.origin)},200,{"Cache-Control":"public, max-age=60"}):json({error:"This AuraPop is not active yet."},404,{"Cache-Control":"no-store"});
   }
 
-  if(url.pathname==="/api/pops"&&request.method==="POST") {
+  if(url.pathname==="/api/aurapops/pops"&&request.method==="POST") {
     if(!sameOrigin(request)) return json({error:"Invalid request origin."},403);
     const body=await readJson(request);
     const p=normalizePop(body);
@@ -299,7 +309,7 @@ async function api(request,env) {
     return json({pop:mapPop(row,url.origin,true),token:raw},201,{"Cache-Control":"no-store"});
   }
 
-  const ownerMatch=url.pathname.match(/^\/api\/pops\/([a-f0-9-]+)$/i);
+  const ownerMatch=url.pathname.match(/^\/api\/aurapops\/pops\/([a-f0-9-]+)$/i);
   if(ownerMatch) {
     const row=await ownerRow(request,env.DB,ownerMatch[1]);
     if(!row) return json({error:"AuraPop access denied."},401,{"Cache-Control":"no-store"});
