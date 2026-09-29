@@ -16,28 +16,17 @@ This repository is intentionally independent from AuraDigital. It contains its o
 
 ## Routes
 
-- `/` — AuraPops Studio
-- `/p/:slug` — public activated AuraPop
-- `/admin` — private activation dashboard
-- `/api/*` — standalone AuraPops API
+- `/aurapops` — AuraPops Studio
+- `/pops/:slug` — public activated AuraPop
+- `/aurapops/admin` — private activation dashboard
+- `/api/aurapops/*` — standalone AuraPops API
 
 ## Cloudflare
 
 Worker name: `aurapops`
 
-Current D1 binding uses the existing Cloudflare D1 database during the migration so data can be preserved. After the standalone deployment is verified, AuraPops can be moved to its own D1 database without changing the frontend API.
+Current D1 binding uses the existing AuraDigital D1 database so existing admin sessions and AuraPops data are shared safely while the application code remains fully separate. AuraPops reuses the existing `__Host-aura_admin` session for `/aurapops/admin`; no second admin password is required.
 
-Required Worker secret:
-
-```
-AURAPOPS_ADMIN_PASSWORD
-```
-
-Recommended custom domain:
-
-```
-aurapops.auradigitalworks.com
-```
 
 Run locally:
 
@@ -56,6 +45,5 @@ npm run deploy:check
 Deploy:
 
 ```bash
-npx wrangler secret put AURAPOPS_ADMIN_PASSWORD
 npm run deploy
 ```
