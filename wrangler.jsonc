@@ -6,11 +6,25 @@
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "preview_urls": true,
+  "routes": [
+    {
+      "pattern": "auradigitalworks.com/aurapops*",
+      "zone_name": "auradigitalworks.com"
+    },
+    {
+      "pattern": "auradigitalworks.com/pops/*",
+      "zone_name": "auradigitalworks.com"
+    },
+    {
+      "pattern": "auradigitalworks.com/api/aurapops/*",
+      "zone_name": "auradigitalworks.com"
+    }
+  ],
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
     "html_handling": "none",
-    "run_worker_first": ["/api/*", "/p/*", "/admin", "/admin/*"]
+    "run_worker_first": ["/aurapops", "/aurapops/*", "/pops/*", "/api/aurapops/*"]
   },
   "d1_databases": [
     {
