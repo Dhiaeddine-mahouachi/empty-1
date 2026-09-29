@@ -10,20 +10,20 @@
 </head>
 <body>
   <section class="login" id="loginView">
-    <form id="loginForm" class="login-card">
+    <div class="login-card">
       <span class="mark">AP</span>
       <h1>AuraPops Admin</h1>
-      <p>Confirm payment and activate finished QR profiles.</p>
-      <label>Password<input id="password" type="password" autocomplete="current-password" required></label>
-      <button type="submit">Sign in</button>
+      <p>AuraPops uses your existing AuraDigital admin session. Sign in to AuraDigital Admin, then return here.</p>
+      <a class="admin-signin" href="/admin" target="_blank" rel="noopener">Open AuraDigital Admin ↗</a>
+      <button id="retrySession" type="button">I signed in — continue</button>
       <div id="loginNotice"></div>
-    </form>
+    </div>
   </section>
 
   <main class="dashboard" id="dashboardView" hidden>
     <header class="dash-head">
-      <div><span class="eyebrow">AURAPOPS CONTROL</span><h1>Activation dashboard</h1></div>
-      <div class="head-actions"><a href="/aurapops" target="_blank">Open builder ↗</a><button id="logout">Log out</button></div>
+      <div><span class="eyebrow">AURAPOPS CONTROL</span><h1>Activation dashboard</h1><small id="currentUser"></small></div>
+      <div class="head-actions"><a href="/aurapops" target="_blank">Open builder ↗</a><a href="/admin" target="_blank">AuraDigital Admin ↗</a></div>
     </header>
     <div id="metrics" class="metrics"></div>
     <section class="panel">
