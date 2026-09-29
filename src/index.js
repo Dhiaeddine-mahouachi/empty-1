@@ -137,7 +137,7 @@ async function ensureSchema(db) {
     db.prepare("CREATE TABLE IF NOT EXISTS aurapops (id TEXT PRIMARY KEY NOT NULL, slug TEXT NOT NULL UNIQUE, owner_token_hash TEXT NOT NULL, title TEXT NOT NULL, subtitle TEXT NOT NULL DEFAULT '', background_mode TEXT NOT NULL DEFAULT 'color' CHECK (background_mode IN ('color','image')), background_color TEXT NOT NULL DEFAULT '#0b1610', card_color TEXT NOT NULL DEFAULT '#111a16', text_color TEXT NOT NULL DEFAULT '#ffffff', accent_color TEXT NOT NULL DEFAULT '#e1e100', avatar_image_id TEXT, background_image_id TEXT, links_json TEXT NOT NULL DEFAULT '[]', status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')), payment_status TEXT NOT NULL DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid','paid')), admin_note TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now')), approved_at TEXT)"),
     db.prepare("CREATE TABLE IF NOT EXISTS aurapop_images (id TEXT PRIMARY KEY NOT NULL, pop_id TEXT NOT NULL, kind TEXT NOT NULL CHECK (kind IN ('avatar','background')), content_type TEXT NOT NULL, image_bytes BLOB NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')), FOREIGN KEY (pop_id) REFERENCES aurapops(id) ON DELETE CASCADE)"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_aurapops_status_created ON aurapops(status, created_at DESC)"),
-    db.prepare("CREATE INDEX IF NOT EXISTS idx_aurapop_images_pop ON aurapop_images(pop_id)"),")
+    db.prepare("CREATE INDEX IF NOT EXISTS idx_aurapop_images_pop ON aurapop_images(pop_id)")
   ]);
   schemaReady=true;
 }
@@ -230,37 +230,45 @@ async function api(request,env) {
   const url=new URL(request.url);
 
   if(url.pathname==="/api/aurapops/health"&&request.method==="GET") return json({ok:true,service:"aurapops"});
-  if(url.pathname==="/api/aurapops/admin/login"&&request.method==="POST") return adminLogin(request,env);
-  if(url.pathname==="/api/aurapops/admin/logout"&&request.method==="POST") {
-    const cookie=parseCookies(request)[ADMIN_COOKIE]||"";
-    if(cookie) await env.DB.prepare("DELETE FROM aurapops_admin_sessions WHERE token_hash=?").bind(await hash(cookie)).run();
-    return json({ok:true},200,{"Set-Cookie":`${ADMIN_COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0`,"Cache-Control":"no-store"});
+
+  if(url.pathname==="/api/aurapops/admin/session"&&request.method==="GET") {
+    const user=await adminSession(request,env.DB);
+    return json({authenticated:Boolean(user),user},200,{"Cache-Control":"no-store"});
   }
-  if(url.pathname==="/api/aurapops/admin/session"&&request.method==="GET") return json({authenticated:await adminSession(request,env)},200,{"Cache-Control":"no-store"});
 
   if(url.pathname.startsWith("/api/aurapops/admin/")) {
-    if(!await adminSession(request,env)) return json({error:"Unauthorized."},401,{"Cache-Control":"no-store"});
+    const admin=await adminSession(request,env.DB);
+    if(!admin) return json({error:"Unauthorized."},401,{"Cache-Control":"no-store"});
+
     if(url.pathname==="/api/aurapops/admin/pops"&&request.method==="GET") {
       const rows=await env.DB.prepare("SELECT * FROM aurapops ORDER BY created_at DESC LIMIT 200").all();
       return json({items:(rows.results||[]).map(r=>mapPop(r,url.origin,true))},200,{"Cache-Control":"no-store"});
     }
+
     const m=url.pathname.match(/^\/api\/aurapops\/admin\/pops\/([a-f0-9-]+)$/i);
     if(m&&request.method==="PATCH") {
       if(admin.role==="viewer") return json({error:"Read-only account."},403,{"Cache-Control":"no-store"});
       if(!sameOrigin(request)) return json({error:"Invalid request origin."},403);
+
       const current=await env.DB.prepare("SELECT * FROM aurapops WHERE id=? LIMIT 1").bind(m[1]).first();
       if(!current) return json({error:"AuraPop not found."},404);
+
       const body=await readJson(request,8192);
       const status=body.status===undefined?current.status:clean(body.status,20);
       const payment=body.paymentStatus===undefined?current.payment_status:clean(body.paymentStatus,20);
       if(!POP_STATUS.has(status)||!PAYMENT_STATUS.has(payment)) throw new AppError(400,"Invalid status.");
       if(status==="approved"&&payment!=="paid") throw new AppError(409,"Confirm payment before activation.");
+
       const note=body.adminNote===undefined?current.admin_note:clean(body.adminNote,500);
       const approvedAt=status==="approved"?(current.approved_at||new Date().toISOString()):null;
-      await env.DB.prepare("UPDATE aurapops SET status=?,payment_status=?,admin_note=?,approved_at=?,updated_at=datetime('now') WHERE id=?").bind(status,payment,note,approvedAt,m[1]).run();
+
+      await env.DB.prepare("UPDATE aurapops SET status=?,payment_status=?,admin_note=?,approved_at=?,updated_at=datetime('now') WHERE id=?")
+        .bind(status,payment,note,approvedAt,m[1]).run();
+
       const updated=await env.DB.prepare("SELECT * FROM aurapops WHERE id=? LIMIT 1").bind(m[1]).first();
       return json({pop:mapPop(updated,url.origin,true)},200,{"Cache-Control":"no-store"});
     }
+
     return json({error:"Not found."},404);
   }
 
