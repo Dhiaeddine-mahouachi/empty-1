@@ -6,12 +6,12 @@
   <meta name="theme-color" content="#07180f">
   <title>AuraPops — Build your smart QR popup</title>
   <meta name="description" content="Create a branded QR popup with avatar, links, maps, menus and playable Snake or Tetris.">
-  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/aurapops/app.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/"><span class="brand-mark">AP</span><span><b>Aura</b>Pops</span></a>
-    <a class="admin-link" href="/admin">Admin</a>
+    <a class="brand" href="/aurapops"><span class="brand-mark">AP</span><span><b>Aura</b>Pops</span></a>
+    <a class="admin-link" href="/aurapops/admin">Admin</a>
   </header>
 
   <main>
@@ -36,7 +36,7 @@
           <div class="step-title"><b>01</b><span>Identity</span></div>
           <div class="fields">
             <label>Name<input name="title" maxlength="80" value="Your Business" required></label>
-            <label>Address<input name="slug" maxlength="54" value="your-business" pattern="[a-zA-Z0-9-]{3,54}" required><small>aurapops…/p/your-business</small></label>
+            <label>Address<input name="slug" maxlength="54" value="your-business" pattern="[a-zA-Z0-9-]{3,54}" required><small>auradigitalworks.com/pops/your-business</small></label>
             <label class="wide">Short message<textarea name="subtitle" maxlength="180">Everything you need, one scan away.</textarea></label>
             <label class="wide">Avatar / logo<input id="avatarInput" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG or WebP · max 420 KB</small></label>
           </div>
@@ -107,6 +107,6 @@
   </main>
 
   <footer><span>AuraPops</span><small>A standalone Aura product.</small></footer>
-  <script src="/app.js"></script>
+  <script src="/aurapops/app.js"></script>
 </body>
 </html>
