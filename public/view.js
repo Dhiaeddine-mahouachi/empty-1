@@ -9,11 +9,11 @@
   const initials=v=>String(v||"AuraPop").split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
 
   function inactive(message="This AuraPop is not active yet."){
-    card.hidden=true;loading.hidden=false;loading.innerHTML=`<h1>AuraPop is waiting for activation.</h1><p>${esc(message)}</p><a href="/">Open AuraPops Studio →</a>`;
+    card.hidden=true;loading.hidden=false;loading.innerHTML=`<h1>AuraPop is waiting for activation.</h1><p>${esc(message)}</p><a href="/aurapops">Open AuraPops Studio →</a>`;
   }
   async function load(){
-    const m=location.pathname.match(/^\/p\/([a-z0-9-]+)$/i);if(!m)return inactive("Invalid AuraPop address.");
-    try{const r=await fetch("/api/public/"+encodeURIComponent(m[1]));const data=await r.json().catch(()=>({}));if(!r.ok||!data.pop)return inactive(data.error);render(data.pop);}catch{inactive("AuraPop could not be loaded right now.");}
+    const m=location.pathname.match(/^\/pops\/([a-z0-9-]+)$/i);if(!m)return inactive("Invalid AuraPop address.");
+    try{const r=await fetch("/api/aurapops/public/"+encodeURIComponent(m[1]));const data=await r.json().catch(()=>({}));if(!r.ok||!data.pop)return inactive(data.error);render(data.pop);}catch{inactive("AuraPop could not be loaded right now.");}
   }
   function render(pop){
     document.title=pop.title+" — AuraPop";
