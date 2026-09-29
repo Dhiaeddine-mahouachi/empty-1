@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07100a">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>AuraPop</title>
+  <link rel="stylesheet" href="/view.css">
+</head>
+<body>
+  <main class="shell" id="shell">
+    <section class="state" id="loadingState"><h1>Opening AuraPop…</h1><p>Loading your interactive profile.</p></section>
+    <article class="card" id="popCard" hidden>
+      <div class="profile">
+        <div class="avatar" id="avatar"><span>AP</span></div>
+        <h1 id="title"></h1>
+        <p id="subtitle"></p>
+      </div>
+      <div class="links" id="links"></div>
+      <a class="brand" href="/" target="_blank" rel="noopener">Made with <b>AuraPops</b></a>
+    </article>
+  </main>
+
+  <section class="game-layer" id="gameLayer" aria-hidden="true">
+    <div class="game-card" role="dialog" aria-modal="true" aria-labelledby="gameTitle">
+      <div class="game-head"><h2 id="gameTitle">Game</h2><button id="closeGame" type="button" aria-label="Close">×</button></div>
+      <p class="score" id="gameScore">Score: 0</p>
+      <div class="canvas-wrap"><canvas id="gameCanvas" width="300" height="300"></canvas></div>
+      <div class="controls" id="gameControls"></div>
+      <button class="restart" id="restartGame" type="button">Restart</button>
+    </div>
+  </section>
+  <script src="/view.js"></script>
+</body>
+</html>
