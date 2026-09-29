@@ -3,7 +3,8 @@
   if(!form)return;
   const $=id=>document.getElementById(id);
   const linkList=$("linkList"), previewLinks=$("previewLinks"), preview=$("previewCard"), avatar=$("previewAvatar"), status=$("builderStatus"), activation=$("activationPanel");
-  const STORE="aurapops:standalone:v1";
+  const STORE="aurapops:path-app:v2";
+  const API="/api/aurapops";
   const presets={
     website:["Website","↗"],menu:["Menu","☰"],instagram:["Instagram","IG"],facebook:["Facebook","f"],
     tiktok:["TikTok","♪"],whatsapp:["WhatsApp","WA"],maps:["Google Maps","⌖"],custom:["Link","↗"],
@@ -92,7 +93,7 @@
     if(!saved?.id||!saved?.token)return;
     state.id=saved.id;state.token=saved.token;
     try{
-      const r=await fetch("/api/pops/"+encodeURIComponent(state.id),{headers:{"X-AuraPop-Token":state.token}});
+      const r=await fetch(API+"/pops/"+encodeURIComponent(state.id),{headers:{"X-AuraPop-Token":state.token}});
       if(!r.ok)throw new Error();
       const {pop}=await r.json();state.links=Array.isArray(pop.links)?pop.links:[];
       form.elements.title.value=pop.title||"";form.elements.slug.value=pop.slug||"";form.elements.slug.readOnly=true;form.elements.subtitle.value=pop.subtitle||"";
@@ -114,7 +115,7 @@
     e.preventDefault();const btn=$("savePop");btn.disabled=true;notice(state.id?"Saving…":"Preparing…");
     try{
       validate();const headers={"Content-Type":"application/json"};if(state.id)headers["X-AuraPop-Token"]=state.token;
-      const r=await fetch(state.id?"/api/pops/"+encodeURIComponent(state.id):"/api/pops",{method:state.id?"PATCH":"POST",headers,body:JSON.stringify(payload())});
+      const r=await fetch(state.id?API+"/pops/"+encodeURIComponent(state.id):API+"/pops",{method:state.id?"PATCH":"POST",headers,body:JSON.stringify(payload())});
       const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Could not save AuraPop.");
       if(!state.id){state.id=data.pop.id;state.token=data.token;localStorage.setItem(STORE,JSON.stringify({id:state.id,token:state.token}));form.elements.slug.value=data.pop.slug;form.elements.slug.readOnly=true;$("newPop").hidden=false;$("savePop").textContent="Save AuraPop changes";}
       state.avatarData=undefined;state.backgroundData=undefined;showActivation(data.pop);notice("Saved. Your QR is ready.","success");activation.scrollIntoView({behavior:"smooth",block:"nearest"});
