@@ -35,13 +35,3 @@ CREATE TABLE IF NOT EXISTS aurapop_images (
 
 CREATE INDEX IF NOT EXISTS idx_aurapop_images_pop
 ON aurapop_images(pop_id);
-
-CREATE TABLE IF NOT EXISTS aurapops_admin_sessions (
-  id TEXT PRIMARY KEY NOT NULL,
-  token_hash TEXT NOT NULL UNIQUE,
-  expires_at TEXT NOT NULL,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
-CREATE INDEX IF NOT EXISTS idx_aurapops_admin_sessions_expires
-ON aurapops_admin_sessions(expires_at);
