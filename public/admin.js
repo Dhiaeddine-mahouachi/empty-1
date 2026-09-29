@@ -1,5 +1,6 @@
 (() => {
   const $=id=>document.getElementById(id);
+  const API="/api/aurapops/admin";
   const login=$("loginView"),dash=$("dashboardView"),notice=$("loginNotice"),content=$("content"),metrics=$("metrics");
   async function api(path,options={}){
     const r=await fetch(path,{...options,headers:{"Content-Type":"application/json",...(options.headers||{})}});
@@ -9,13 +10,13 @@
   }
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
   async function check(){
-    try{const d=await api("/api/admin/session");if(d.authenticated){login.hidden=true;dash.hidden=false;await load();return}}catch{}
+    try{const d=await api(API+"/session");if(d.authenticated){login.hidden=true;dash.hidden=false;await load();return}}catch{}
     login.hidden=false;dash.hidden=true;
   }
   async function load(){
     content.innerHTML='<div class="empty">Loading…</div>';
     try{
-      const d=await api("/api/admin/pops"),items=d.items||[];
+      const d=await api(API+"/pops"),items=d.items||[];
       const pending=items.filter(x=>x.status==="pending").length,unpaid=items.filter(x=>x.paymentStatus!=="paid").length,active=items.filter(x=>x.status==="approved"&&x.paymentStatus==="paid").length;
       metrics.innerHTML=`<div class="metric warn"><span>Pending</span><strong>${pending}</strong></div><div class="metric warn"><span>Waiting payment</span><strong>${unpaid}</strong></div><div class="metric good"><span>Active</span><strong>${active}</strong></div>`;
       if(!items.length){content.innerHTML='<div class="empty">No AuraPops yet.</div>';return;}
@@ -38,21 +39,21 @@
       content.innerHTML=`<div class="table-wrap"><table class="table"><thead><tr><th>Status</th><th>AuraPop</th><th>Payment</th><th>Items</th><th>Updated</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
       document.querySelectorAll("[data-pay]").forEach(b=>b.addEventListener("click",async()=>{
         const item=items.find(x=>x.id===b.dataset.pay);if(!item)return;b.disabled=true;
-        try{const next=item.paymentStatus==="paid"?"unpaid":"paid";await api("/api/admin/pops/"+encodeURIComponent(item.id),{method:"PATCH",body:JSON.stringify({paymentStatus:next,status:next==="unpaid"&&item.status==="approved"?"pending":item.status})});await load()}catch(e){alert(e.message)}finally{b.disabled=false}
+        try{const next=item.paymentStatus==="paid"?"unpaid":"paid";await api(API+"/pops/"+encodeURIComponent(item.id),{method:"PATCH",body:JSON.stringify({paymentStatus:next,status:next==="unpaid"&&item.status==="approved"?"pending":item.status})});await load()}catch(e){alert(e.message)}finally{b.disabled=false}
       }));
       document.querySelectorAll("[data-activate]").forEach(b=>b.addEventListener("click",async()=>{
-        b.disabled=true;try{await api("/api/admin/pops/"+encodeURIComponent(b.dataset.activate),{method:"PATCH",body:JSON.stringify({status:"approved",paymentStatus:"paid"})});await load()}catch(e){alert(e.message)}finally{b.disabled=false}
+        b.disabled=true;try{await api(API+"/pops/"+encodeURIComponent(b.dataset.activate),{method:"PATCH",body:JSON.stringify({status:"approved",paymentStatus:"paid"})});await load()}catch(e){alert(e.message)}finally{b.disabled=false}
       }));
       document.querySelectorAll("[data-hold]").forEach(b=>b.addEventListener("click",async()=>{
-        b.disabled=true;try{await api("/api/admin/pops/"+encodeURIComponent(b.dataset.hold),{method:"PATCH",body:JSON.stringify({status:"pending"})});await load()}catch(e){alert(e.message)}finally{b.disabled=false}
+        b.disabled=true;try{await api(API+"/pops/"+encodeURIComponent(b.dataset.hold),{method:"PATCH",body:JSON.stringify({status:"pending"})});await load()}catch(e){alert(e.message)}finally{b.disabled=false}
       }));
     }catch(e){if(e.status===401)return check();content.innerHTML=`<div class="empty">${esc(e.message)}</div>`;}
   }
   $("loginForm").addEventListener("submit",async e=>{
     e.preventDefault();notice.textContent="Signing in…";
-    try{await api("/api/admin/login",{method:"POST",body:JSON.stringify({password:$("password").value})});notice.textContent="";await check()}catch(err){notice.textContent=err.message;}
+    try{await api(API+"/login",{method:"POST",body:JSON.stringify({password:$("password").value})});notice.textContent="";await check()}catch(err){notice.textContent=err.message;}
   });
-  $("logout").addEventListener("click",async()=>{try{await api("/api/admin/logout",{method:"POST",body:"{}"})}catch{}location.reload()});
+  $("logout").addEventListener("click",async()=>{try{await api(API+"/logout",{method:"POST",body:"{}"})}catch{}location.reload()});
   $("refresh").addEventListener("click",load);
   check();
 })();
