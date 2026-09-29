@@ -5,8 +5,7 @@ const IMAGE_TYPES = new Set(["image/jpeg","image/png","image/webp"]);
 const LINK_TYPES = new Set(["website","menu","instagram","facebook","tiktok","whatsapp","maps","custom","snake","tetris"]);
 const POP_STATUS = new Set(["pending","approved","rejected"]);
 const PAYMENT_STATUS = new Set(["unpaid","paid"]);
-const ADMIN_COOKIE = "__Host-aurapops_admin";
-const SESSION_HOURS = 12;
+const ADMIN_COOKIE = "__Host-aura_admin";
 let schemaReady = false;
 
 export default {
@@ -84,6 +83,13 @@ async function hash(value) {
   const digest=await crypto.subtle.digest("SHA-256",data);
   return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
 }
+async function hashAdminToken(value) {
+  const data=new TextEncoder().encode(String(value||""));
+  const bytes=new Uint8Array(await crypto.subtle.digest("SHA-256",data));
+  let binary="";
+  for(const byte of bytes) binary+=String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
+}
 function token() {
   return [...crypto.getRandomValues(new Uint8Array(32))].map(b=>b.toString(16).padStart(2,"0")).join("");
 }
@@ -130,10 +136,8 @@ async function ensureSchema(db) {
   await db.batch([
     db.prepare("CREATE TABLE IF NOT EXISTS aurapops (id TEXT PRIMARY KEY NOT NULL, slug TEXT NOT NULL UNIQUE, owner_token_hash TEXT NOT NULL, title TEXT NOT NULL, subtitle TEXT NOT NULL DEFAULT '', background_mode TEXT NOT NULL DEFAULT 'color' CHECK (background_mode IN ('color','image')), background_color TEXT NOT NULL DEFAULT '#0b1610', card_color TEXT NOT NULL DEFAULT '#111a16', text_color TEXT NOT NULL DEFAULT '#ffffff', accent_color TEXT NOT NULL DEFAULT '#e1e100', avatar_image_id TEXT, background_image_id TEXT, links_json TEXT NOT NULL DEFAULT '[]', status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')), payment_status TEXT NOT NULL DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid','paid')), admin_note TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL DEFAULT (datetime('now')), updated_at TEXT NOT NULL DEFAULT (datetime('now')), approved_at TEXT)"),
     db.prepare("CREATE TABLE IF NOT EXISTS aurapop_images (id TEXT PRIMARY KEY NOT NULL, pop_id TEXT NOT NULL, kind TEXT NOT NULL CHECK (kind IN ('avatar','background')), content_type TEXT NOT NULL, image_bytes BLOB NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')), FOREIGN KEY (pop_id) REFERENCES aurapops(id) ON DELETE CASCADE)"),
-    db.prepare("CREATE TABLE IF NOT EXISTS aurapops_admin_sessions (id TEXT PRIMARY KEY NOT NULL, token_hash TEXT NOT NULL UNIQUE, expires_at TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')))"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_aurapops_status_created ON aurapops(status, created_at DESC)"),
-    db.prepare("CREATE INDEX IF NOT EXISTS idx_aurapop_images_pop ON aurapop_images(pop_id)"),
-    db.prepare("CREATE INDEX IF NOT EXISTS idx_aurapops_admin_sessions_expires ON aurapops_admin_sessions(expires_at)")
+    db.prepare("CREATE INDEX IF NOT EXISTS idx_aurapop_images_pop ON aurapop_images(pop_id)"),")
   ]);
   schemaReady=true;
 }
@@ -211,25 +215,16 @@ async function ownerRow(request,db,id) {
 }
 async function adminSession(request,db) {
   const value=parseCookies(request)[ADMIN_COOKIE]||"";
-  if(!/^[a-f0-9]{64}$/i.test(value)) return false;
-  const row=await db.prepare("SELECT id FROM aurapops_admin_sessions WHERE token_hash=? AND expires_at>datetime('now') LIMIT 1").bind(await hash(value)).first();
-  return Boolean(row);
+  if(!/^[A-Za-z0-9_-]{40,50}$/.test(value)) return null;
+  const row=await db.prepare(
+    "SELECT u.id,u.username,u.display_name,u.role FROM admin_sessions s " +
+    "JOIN admin_users u ON u.id=s.user_id " +
+    "WHERE s.token_hash=? AND s.expires_at>datetime('now') AND u.active=1 LIMIT 1"
+  ).bind(await hashAdminToken(value)).first();
+  if(!row || !["owner","manager","viewer"].includes(row.role)) return null;
+  return {id:row.id,username:row.username,displayName:row.display_name,role:row.role};
 }
-async function adminLogin(request,env) {
-  if(!sameOrigin(request)) return json({error:"Invalid request origin."},403);
-  const body=await readJson(request,4096);
-  const configured=String(env.AURAPOPS_ADMIN_PASSWORD||"");
-  if(!configured) return json({error:"Admin password is not configured."},503);
-  const supplied=String(body.password||"");
-  const a=new TextEncoder().encode(configured), b=new TextEncoder().encode(supplied);
-  let diff=a.length^b.length; const len=Math.max(a.length,b.length);
-  for(let i=0;i<len;i++) diff|=(a[i]||0)^(b[i]||0);
-  if(diff!==0) return json({error:"Invalid password."},401,{"Cache-Control":"no-store"});
-  const raw=token(), id=crypto.randomUUID();
-  await env.DB.prepare("DELETE FROM aurapops_admin_sessions WHERE expires_at<=datetime('now')").run();
-  await env.DB.prepare("INSERT INTO aurapops_admin_sessions (id,token_hash,expires_at) VALUES (?,?,datetime('now',?))").bind(id,await hash(raw),`+${SESSION_HOURS} hours`).run();
-  return json({ok:true},200,{"Cache-Control":"no-store","Set-Cookie":`${ADMIN_COOKIE}=${raw}; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=${SESSION_HOURS*3600}`});
-}
+
 async function api(request,env) {
   await ensureSchema(env.DB);
   const url=new URL(request.url);
@@ -251,6 +246,7 @@ async function api(request,env) {
     }
     const m=url.pathname.match(/^\/api\/aurapops\/admin\/pops\/([a-f0-9-]+)$/i);
     if(m&&request.method==="PATCH") {
+      if(admin.role==="viewer") return json({error:"Read-only account."},403,{"Cache-Control":"no-store"});
       if(!sameOrigin(request)) return json({error:"Invalid request origin."},403);
       const current=await env.DB.prepare("SELECT * FROM aurapops WHERE id=? LIMIT 1").bind(m[1]).first();
       if(!current) return json({error:"AuraPop not found."},404);
