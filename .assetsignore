@@ -1,0 +1,8 @@
+src/**
+migrations/**
+.github/**
+node_modules/**
+wrangler.jsonc
+package.json
+README.md
+.gitignore
