@@ -1,0 +1,14 @@
+{
+  "name": "aurapops",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/index.js && node --check public/app.js && node --check public/view.js && node --check public/admin.js",
+    "deploy:check": "wrangler deploy --dry-run --outdir .wrangler/dry-run",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.120.1"
+  }
+}
