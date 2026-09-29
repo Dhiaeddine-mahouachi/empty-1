@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#07180f">
+  <title>AuraPops Admin</title>
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+  <section class="login" id="loginView">
+    <form id="loginForm" class="login-card">
+      <span class="mark">AP</span>
+      <h1>AuraPops Admin</h1>
+      <p>Confirm payment and activate finished QR profiles.</p>
+      <label>Password<input id="password" type="password" autocomplete="current-password" required></label>
+      <button type="submit">Sign in</button>
+      <div id="loginNotice"></div>
+    </form>
+  </section>
+
+  <main class="dashboard" id="dashboardView" hidden>
+    <header class="dash-head">
+      <div><span class="eyebrow">AURAPOPS CONTROL</span><h1>Activation dashboard</h1></div>
+      <div class="head-actions"><a href="/" target="_blank">Open builder ↗</a><button id="logout">Log out</button></div>
+    </header>
+    <div id="metrics" class="metrics"></div>
+    <section class="panel">
+      <div class="panel-head"><div><h2>AuraPops</h2><p>Public QR pages only open after payment is marked paid and the profile is activated.</p></div><button id="refresh">Refresh</button></div>
+      <div id="content"></div>
+    </section>
+  </main>
+  <script src="/admin.js"></script>
+</body>
+</html>
