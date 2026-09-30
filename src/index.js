@@ -21,6 +21,19 @@ export default {
 
       const url = new URL(request.url);
       let response;
+      const agencyHost = ["auradigitalworks.com", "www.auradigitalworks.com"].includes(url.hostname);
+      if (agencyHost && ["/aurapops", "/aurapops/"].includes(url.pathname) && ["GET", "HEAD"].includes(request.method)) {
+        response = await env.ASSETS.fetch(new Request(new URL("/showcase.html", url), request));
+        return secure(response, request);
+      }
+      if (agencyHost && url.pathname.startsWith("/aurapops/") && !url.pathname.startsWith("/aurapops/showcase.")) {
+        const target = new URL(url.pathname.slice("/aurapops".length) || "/", "https://aurapops.online");
+        target.search = url.search;
+        return secure(Response.redirect(target.toString(), 302), request);
+      }
+      if (agencyHost && url.pathname.startsWith("/pops/")) {
+        return secure(Response.redirect("https://aurapops.online" + url.pathname + url.search, 301), request);
+      }
 
       if (url.pathname === "/" || url.pathname === "/aurapops" || url.pathname === "/aurapops/") {
         response = await env.ASSETS.fetch(new Request(new URL("/index.html", url), request));
@@ -126,7 +139,7 @@ function secure(response, request) {
   h.set("Referrer-Policy","no-referrer");
   h.set("Permissions-Policy","camera=(), microphone=(), geolocation=()");
   if((h.get("Content-Type")||"").includes("text/html")) {
-    h.set("Content-Security-Policy","default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://api.qrserver.com; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests");
+    h.set("Content-Security-Policy","default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://api.qrserver.com https://auradigitalworks.com; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests");
   } else if(!h.has("Content-Security-Policy")) {
     h.set("Content-Security-Policy","default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
   }
@@ -211,7 +224,7 @@ function mapPop(row,origin,includeState=false) {
     textColor:row.text_color,accentColor:row.accent_color,links,
     avatarUrl:row.avatar_image_id?`${origin}/api/aurapops/images/${row.avatar_image_id}`:"",
     backgroundImageUrl:row.background_image_id?`${origin}/api/aurapops/images/${row.background_image_id}`:"",
-    publicUrl:`${origin}/pops/${row.slug}`,updatedAt:row.updated_at
+    publicUrl:`https://aurapops.online/pops/${row.slug}`,updatedAt:row.updated_at
   };
   if(includeState){pop.status=row.status;pop.paymentStatus=row.payment_status;pop.adminNote=row.admin_note||"";}
   return pop;
