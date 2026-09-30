@@ -18,6 +18,14 @@
     {
       "pattern": "auradigitalworks.com/api/aurapops/*",
       "zone_name": "auradigitalworks.com"
+    },
+    {
+      "pattern": "aurapops.online/*",
+      "zone_name": "aurapops.online"
+    },
+    {
+      "pattern": "www.aurapops.online/*",
+      "zone_name": "aurapops.online"
     }
   ],
   "assets": {
