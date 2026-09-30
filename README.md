@@ -25,7 +25,7 @@ This repository is intentionally independent from AuraDigital. It contains its o
 
 Worker name: `aurapops`
 
-Current D1 binding uses the existing AuraDigital D1 database so existing admin sessions and AuraPops data are shared safely while the application code remains fully separate. AuraPops reuses the existing `__Host-aura_admin` session for `/aurapops/admin`; no second admin password is required.
+Current D1 binding uses the existing AuraDigital D1 database so AuraPops data remains compatible while the application code stays fully separate. The AuraPops dashboard now supports its own HttpOnly password session, while an existing AuraDigital admin session is still accepted as a fallback.
 
 
 Run locally:
