@@ -278,7 +278,7 @@ async function api(request,env) {
     if(!image) return new Response("Not found.",{status:404});
     let allowed=image.status==="approved"&&image.payment_status==="paid";
     if(!allowed) {
-      allowed=await adminSession(request,env);
+      allowed=await adminSession(request,env.DB);
       if(!allowed) {
         const owner=request.headers.get("X-AuraPop-Token")||"";
         allowed=/^[a-f0-9]{64}$/i.test(owner)&&await hash(owner)===image.owner_token_hash;
