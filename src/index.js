@@ -6,6 +6,11 @@ const LINK_TYPES = new Set(["website","menu","instagram","facebook","tiktok","wh
 const POP_STATUS = new Set(["pending","approved","rejected"]);
 const PAYMENT_STATUS = new Set(["unpaid","paid"]);
 const ADMIN_COOKIE = "__Host-aura_admin";
+const AURAPOPS_ADMIN_COOKIE = "__Host-aurapops_admin";
+const AURAPOPS_PASSWORD_SALT = "aurapops-admin-v1-2026";
+const AURAPOPS_PASSWORD_HASH = "d473e06ab31aa6aa510400377c67f8bd464cef619efbc76bd37ff63a305288c1";
+const AURAPOPS_PASSWORD_ITERATIONS = 250000;
+const AURAPOPS_SESSION_MAX_AGE = 60 * 60 * 24 * 14;
 let schemaReady = false;
 
 export default {
