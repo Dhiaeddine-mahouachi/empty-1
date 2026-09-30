@@ -13,9 +13,11 @@
     <div class="login-card">
       <span class="mark">AP</span>
       <h1>AuraPops Admin</h1>
-      <p>AuraPops uses your existing AuraDigital admin session. Sign in to AuraDigital Admin, then return here.</p>
-      <a class="admin-signin" href="/admin" target="_blank" rel="noopener">Open AuraDigital Admin ↗</a>
-      <button id="retrySession" type="button">I signed in — continue</button>
+      <p>Enter the private AuraPops dashboard password to manage requests, payments and activations.</p>
+      <form id="loginForm">
+        <label>Password<input id="password" name="password" type="password" autocomplete="current-password" required></label>
+        <button type="submit">Sign in</button>
+      </form>
       <div id="loginNotice"></div>
     </div>
   </section>
@@ -23,7 +25,7 @@
   <main class="dashboard" id="dashboardView" hidden>
     <header class="dash-head">
       <div><span class="eyebrow">AURAPOPS CONTROL</span><h1>Activation dashboard</h1><small id="currentUser"></small></div>
-      <div class="head-actions"><a href="/aurapops" target="_blank">Open builder ↗</a><a href="/admin" target="_blank">AuraDigital Admin ↗</a></div>
+      <div class="head-actions"><a href="/aurapops" target="_blank">Open builder ↗</a><button id="logout" type="button">Sign out</button></div>
     </header>
     <div id="metrics" class="metrics"></div>
     <section class="panel">
