@@ -95,6 +95,16 @@ async function hashAdminToken(value) {
   for(const byte of bytes) binary+=String.fromCharCode(byte);
   return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
 }
+async function verifyAuraPopsPassword(value) {
+  const encoder=new TextEncoder();
+  const key=await crypto.subtle.importKey("raw",encoder.encode(String(value||"")),{name:"PBKDF2"},false,["deriveBits"]);
+  const bits=await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:encoder.encode(AURAPOPS_PASSWORD_SALT),iterations:AURAPOPS_PASSWORD_ITERATIONS},key,256);
+  const actual=[...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,"0")).join("");
+  if(actual.length!==AURAPOPS_PASSWORD_HASH.length) return false;
+  let diff=0;
+  for(let i=0;i<actual.length;i++) diff|=actual.charCodeAt(i)^AURAPOPS_PASSWORD_HASH.charCodeAt(i);
+  return diff===0;
+}
 function token() {
   return [...crypto.getRandomValues(new Uint8Array(32))].map(b=>b.toString(16).padStart(2,"0")).join("");
 }
