@@ -255,6 +255,29 @@ async function api(request,env) {
 
   if(url.pathname==="/api/aurapops/health"&&request.method==="GET") return json({ok:true,service:"aurapops"});
 
+  if(url.pathname==="/api/aurapops/admin/login"&&request.method==="POST") {
+    if(!sameOrigin(request)) return json({error:"Invalid request origin."},403,{"Cache-Control":"no-store"});
+    const body=await readJson(request,2048);
+    if(!(await verifyAuraPopsPassword(body.password))) return json({error:"Incorrect password."},401,{"Cache-Control":"no-store"});
+    const raw=token();
+    await env.DB.prepare("DELETE FROM aurapops_admin_sessions WHERE expires_at<=datetime('now')").run();
+    await env.DB.prepare("INSERT INTO aurapops_admin_sessions (token_hash,expires_at) VALUES (?,datetime('now','+14 days'))").bind(await hash(raw)).run();
+    return json({authenticated:true,user:{id:"aurapops-owner",username:"owner",displayName:"AuraPops Owner",role:"owner"}},200,{
+      "Cache-Control":"no-store",
+      "Set-Cookie":`${AURAPOPS_ADMIN_COOKIE}=${raw}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${AURAPOPS_SESSION_MAX_AGE}`
+    });
+  }
+
+  if(url.pathname==="/api/aurapops/admin/logout"&&request.method==="POST") {
+    if(!sameOrigin(request)) return json({error:"Invalid request origin."},403,{"Cache-Control":"no-store"});
+    const raw=parseCookies(request)[AURAPOPS_ADMIN_COOKIE]||"";
+    if(/^[a-f0-9]{64}$/i.test(raw)) await env.DB.prepare("DELETE FROM aurapops_admin_sessions WHERE token_hash=?").bind(await hash(raw)).run();
+    return json({ok:true},200,{
+      "Cache-Control":"no-store",
+      "Set-Cookie":`${AURAPOPS_ADMIN_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`
+    });
+  }
+
   if(url.pathname==="/api/aurapops/admin/session"&&request.method==="GET") {
     const user=await adminSession(request,env.DB);
     return json({authenticated:Boolean(user),user},200,{"Cache-Control":"no-store"});
