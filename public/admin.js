@@ -15,7 +15,7 @@
   const canWrite=()=>currentUser&&currentUser.role!=="viewer";
 
   async function check(){
-    notice.textContent="Checking AuraDigital session…";
+    notice.textContent="Checking session…";
     try{
       const d=await api(API+"/session");
       if(d.authenticated&&d.user){
@@ -31,7 +31,7 @@
     currentUser=null;
     login.hidden=false;
     dash.hidden=true;
-    notice.textContent="Sign in to AuraDigital Admin first, then click continue.";
+    notice.textContent="Enter the AuraPops password.";
   }
 
   async function load(){
@@ -98,7 +98,25 @@
     }
   }
 
-  $("retrySession").addEventListener("click",check);
+  $("loginForm").addEventListener("submit",async event=>{
+    event.preventDefault();
+    notice.textContent="Signing in…";
+    try{
+      const d=await api(API+"/login",{method:"POST",body:JSON.stringify({password:$("password").value})});
+      currentUser=d.user;
+      $("password").value="";
+      await check();
+    }catch(e){notice.textContent=e.message||"Sign-in failed.";}
+  });
+
+  $("logout").addEventListener("click",async()=>{
+    try{await api(API+"/logout",{method:"POST",body:"{}"});}catch{}
+    currentUser=null;
+    dash.hidden=true;
+    login.hidden=false;
+    notice.textContent="Signed out.";
+  });
+
   $("refresh").addEventListener("click",load);
   check();
 })();
