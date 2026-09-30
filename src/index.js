@@ -231,7 +231,14 @@ async function ownerRow(request,db,id) {
   return row&&await hash(value)===row.owner_token_hash?row:null;
 }
 async function adminSession(request,db) {
-  const value=parseCookies(request)[ADMIN_COOKIE]||"";
+  const cookies=parseCookies(request);
+  const auraPopsValue=cookies[AURAPOPS_ADMIN_COOKIE]||"";
+  if(/^[a-f0-9]{64}$/i.test(auraPopsValue)) {
+    const own=await db.prepare("SELECT token_hash FROM aurapops_admin_sessions WHERE token_hash=? AND expires_at>datetime('now') LIMIT 1").bind(await hash(auraPopsValue)).first();
+    if(own) return {id:"aurapops-owner",username:"owner",displayName:"AuraPops Owner",role:"owner"};
+  }
+
+  const value=cookies[ADMIN_COOKIE]||"";
   if(!/^[A-Za-z0-9_-]{40,50}$/.test(value)) return null;
   const row=await db.prepare(
     "SELECT u.id,u.username,u.display_name,u.role FROM admin_sessions s " +
