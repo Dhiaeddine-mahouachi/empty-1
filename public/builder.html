@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#07180f">
+  <title>AuraPops Studio — Build your smart QR popup</title>
+  <meta name="description" content="Create a branded QR popup with avatar, links, maps, menus and playable Snake or Tetris.">
+  <link rel="stylesheet" href="/aurapops/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">AP</span><span><b>Aura</b>Pops</span></a>
+    <a class="admin-link" href="/">← Home</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <span class="eyebrow">SMART QR PROFILE · LINKS · MINI GAMES</span>
+        <h1>One scan.<br><em>Everything pops up.</em></h1>
+        <p>Build a mobile popup for your business, table, event or personal brand. Add your avatar, design, links, menu, maps and mini games — then activate the permanent QR after payment.</p>
+        <a class="primary" href="#builder">Build your AuraPop ↓</a>
+      </div>
+      <div class="hero-orbit" aria-hidden="true"><span>MENU</span><span>MAPS</span><span>SOCIAL</span><span>GAMES</span><i></i></div>
+    </section>
+
+    <section class="builder-wrap" id="builder">
+      <form class="builder" id="popBuilder" novalidate>
+        <header class="builder-head">
+          <div><span class="eyebrow">AURAPOPS STUDIO</span><h2>Build it live.</h2></div>
+          <button class="ghost" id="newPop" type="button" hidden>New AuraPop</button>
+        </header>
+
+        <section class="step">
+          <div class="step-title"><b>01</b><span>Identity</span></div>
+          <div class="fields">
+            <label>Name<input name="title" maxlength="80" value="Your Business" required></label>
+            <label>Address<input name="slug" maxlength="54" value="your-business" pattern="[a-zA-Z0-9-]{3,54}" required><small>aurapops.online/pops/your-business</small></label>
+            <label class="wide">Short message<textarea name="subtitle" maxlength="180">Everything you need, one scan away.</textarea></label>
+            <label class="wide">Avatar / logo<input id="avatarInput" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG or WebP · max 420 KB</small></label>
+          </div>
+        </section>
+
+        <section class="step">
+          <div class="step-title"><b>02</b><span>Design</span></div>
+          <div class="fields">
+            <div class="wide">
+              <span class="field-name">Background</span>
+              <div class="pills">
+                <label><input type="radio" name="backgroundMode" value="color" checked> Color</label>
+                <label><input type="radio" name="backgroundMode" value="image"> Image</label>
+              </div>
+            </div>
+            <label>Background<input name="backgroundColor" type="color" value="#0b1610"></label>
+            <label>Card<input name="cardColor" type="color" value="#111a16"></label>
+            <label>Text<input name="textColor" type="color" value="#ffffff"></label>
+            <label>Accent<input name="accentColor" type="color" value="#e1e100"></label>
+            <label class="wide" id="backgroundUploadWrap" hidden>Background image<input id="backgroundInput" type="file" accept="image/jpeg,image/png,image/webp"></label>
+          </div>
+        </section>
+
+        <section class="step">
+          <div class="step-title"><b>03</b><span>Links & games</span></div>
+          <div class="add-row">
+            <select id="linkPreset">
+              <option value="website">Website</option><option value="menu">Menu</option><option value="instagram">Instagram</option>
+              <option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="whatsapp">WhatsApp</option>
+              <option value="maps">Google Maps</option><option value="custom">Custom link</option>
+              <option value="snake">🎮 Snake</option><option value="tetris">🎮 Tetris</option>
+            </select>
+            <button id="addLink" type="button">+ Add</button>
+          </div>
+          <div id="linkList" class="link-list"></div>
+          <p class="hint">Snake and Tetris run inside the AuraPop. Visitors never leave your popup.</p>
+        </section>
+
+        <section class="step">
+          <div class="step-title"><b>04</b><span>Prepare QR</span></div>
+          <div class="submit-row">
+            <button class="primary" id="savePop" type="submit">Prepare AuraPop & QR</button>
+            <span id="builderStatus"></span>
+          </div>
+        </section>
+      </form>
+
+      <aside class="preview-panel">
+        <span class="eyebrow">LIVE PREVIEW</span>
+        <h2>Exactly what the QR opens.</h2>
+        <div class="phone">
+          <div class="preview" id="previewCard">
+            <div class="preview-inner">
+              <div class="avatar" id="previewAvatar"><span>AP</span></div>
+              <h3 id="previewTitle">Your Business</h3>
+              <p id="previewSubtitle">Everything you need, one scan away.</p>
+              <div id="previewLinks" class="preview-links"><div class="empty">Add your first item.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <section class="activation" id="activationPanel">
+          <div class="activation-head"><div><b>Your permanent QR is ready.</b><small id="activationText">Complete payment to activate it.</small></div><span id="activationStatus">Pending</span></div>
+          <div class="qr-row"><img id="popQr" alt="AuraPop QR code"><div><a id="publicLink" target="_blank" rel="noopener"></a><p>The URL and QR never change after activation.</p></div></div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <footer><span>AuraPops</span><small>A standalone Aura product.</small></footer>
+  <script src="/aurapops/app.js"></script>
+</body>
+</html>
