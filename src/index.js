@@ -139,7 +139,7 @@ function secure(response, request) {
   h.set("Referrer-Policy","no-referrer");
   h.set("Permissions-Policy","camera=(), microphone=(), geolocation=()");
   if((h.get("Content-Type")||"").includes("text/html")) {
-    h.set("Content-Security-Policy","default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://api.qrserver.com https://auradigitalworks.com; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests");
+    h.set("Content-Security-Policy","default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://api.qrserver.com https://auradigitalworks.com https://images.unsplash.com; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests");
   } else if(!h.has("Content-Security-Policy")) {
     h.set("Content-Security-Policy","default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
   }
