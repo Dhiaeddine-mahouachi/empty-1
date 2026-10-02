@@ -17,11 +17,43 @@
   const slug=v=>String(v||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,54);
   function notice(text,kind=""){status.textContent=text;status.className=kind;}
   function revoke(key){if(state[key])URL.revokeObjectURL(state[key]);state[key]="";}
-  async function fileData(file){
+  let pendingImages=0;
+  async function fileData(file,maxDimension=1920){
     if(!file)return "";
-    if(file.size>420*1024)throw new Error("Image must be smaller than 420 KB.");
+    if(file.size>20*1024*1024)throw new Error("Choose an image smaller than 20 MB.");
     if(!["image/jpeg","image/png","image/webp"].includes(file.type))throw new Error("Use JPG, PNG or WebP.");
-    return await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||""));r.onerror=()=>reject(new Error("Could not read image."));r.readAsDataURL(file);});
+    const read=blob=>new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||""));r.onerror=()=>reject(new Error("Could not read image."));r.readAsDataURL(blob);});
+    if(file.size<=420*1024)return read(file);
+    const url=URL.createObjectURL(file);
+    try{
+      const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(new Error("Could not open this image. Try another JPG, PNG or WebP."));i.src=url;});
+      const canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");
+      if(!ctx)throw new Error("Image processing is unavailable in this browser.");
+      let edge=maxDimension;
+      for(let attempt=0;attempt<10;attempt++){
+        const scale=Math.min(1,edge/Math.max(img.naturalWidth,img.naturalHeight));
+        canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",Math.max(.55,.9-attempt*.05)));
+        if(!blob)throw new Error("Could not optimize this image.");
+        if(blob.size<=420*1024)return read(blob);
+        edge=Math.round(edge*.8);
+      }
+      throw new Error("Could not optimize this image. Try a smaller picture.");
+    }finally{URL.revokeObjectURL(url);}
+  }
+  function imageUpload(input,dataKey,urlKey,maxDimension){
+    input.addEventListener("change",async e=>{
+      const file=e.target.files?.[0];if(!file)return;
+      pendingImages++;input.disabled=true;
+      const help=input.parentElement.querySelector("small");if(help)help.textContent="Optimizing image…";
+      try{
+        const data=await fileData(file,maxDimension);
+        state[dataKey]=data;revoke(urlKey);state[urlKey]=data;renderPreview();
+        if(help)help.textContent="Image ready · JPG, PNG or WebP · max 20 MB";
+      }catch(err){input.value="";if(help)help.textContent=err.message;notice(err.message,"error");}
+      finally{pendingImages--;input.disabled=false;}
+    });
   }
   function add(type,label="",url=""){
     if(state.links.length>=12)return notice("Maximum 12 items.","error");
@@ -110,12 +142,13 @@
   form.addEventListener("input",e=>{if(e.target.name==="title"&&!state.id&&!form.elements.slug.dataset.touched)form.elements.slug.value=slug(e.target.value);renderPreview();});
   form.elements.slug.addEventListener("input",e=>{e.target.dataset.touched="1";e.target.value=slug(e.target.value);});
   form.querySelectorAll('input[name="backgroundMode"]').forEach(x=>x.addEventListener("change",()=>{$("backgroundUploadWrap").hidden=form.elements.backgroundMode.value!=="image";renderPreview();}));
-  $("avatarInput").addEventListener("change",async e=>{try{state.avatarData=await fileData(e.target.files?.[0]);revoke("avatarUrl");if(e.target.files?.[0])state.avatarUrl=URL.createObjectURL(e.target.files[0]);renderPreview();}catch(err){e.target.value="";notice(err.message,"error");}});
-  $("backgroundInput").addEventListener("change",async e=>{try{state.backgroundData=await fileData(e.target.files?.[0]);revoke("backgroundUrl");if(e.target.files?.[0])state.backgroundUrl=URL.createObjectURL(e.target.files[0]);renderPreview();}catch(err){e.target.value="";notice(err.message,"error");}});
+  imageUpload($("avatarInput"),"avatarData","avatarUrl",1024);
+  imageUpload($("backgroundInput"),"backgroundData","backgroundUrl",1920);
   $("newPop").addEventListener("click",()=>{if(confirm("Start a new AuraPop? Your current AuraPop remains saved.")){localStorage.removeItem(STORE);location.href="/builder.html";}});
   form.addEventListener("submit",async e=>{
     e.preventDefault();const btn=$("savePop");btn.disabled=true;notice(state.id?"Saving…":"Preparing…");
     try{
+      if(pendingImages)throw new Error("Wait for your images to finish optimizing, then save.");
       validate();
       let account=await (await fetch(API+"/account/session")).json();
       if(account.verificationRequired){$("builderVerification").hidden=false;throw new Error("Enter the email verification code before saving your page.");}
