@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#06110d">
   <title>AuraPops Studio — Build your smart QR popup</title>
   <meta name="description" content="Create a branded QR popup with avatar, links, maps, menus and playable Snake or Tetris.">
-  <link rel="stylesheet" href="/aurapops/app.css?v=20261002-minimal">
+  <link rel="stylesheet" href="/aurapops/app.css?v=20261002-account-state">
   <link rel="icon" type="image/x-icon" href="/favicon.ico?v=20261002">
   <link rel="icon" type="image/png" sizes="32x32" href="/brand/icon-32.png?v=20261002">
   <link rel="apple-touch-icon" sizes="180x180" href="/brand/icon-180.png">
@@ -81,7 +81,8 @@
 
         <section class="step">
           <div class="step-title"><b>04</b><span>Your account & QR</span></div>
-          <div id="customerAccountFields" class="fields">
+          <p id="accountCheckStatus" role="status">Checking your sign-in…</p>
+          <div id="customerAccountFields" class="fields" hidden>
             <p class="wide">Create your account to keep this page and manage it from any device. Already registered? <a href="/login" target="_blank" rel="noopener">Sign in in a new tab</a>, then save your page here.</p>
             <label>Your name<input id="customerName" autocomplete="name" maxlength="80"></label>
             <label>Email<input id="customerEmail" type="email" autocomplete="email" maxlength="254"></label>
@@ -118,6 +119,6 @@
   </main>
 
   <footer><span>AuraPops</span><small>A standalone Aura product.</small></footer>
-  <script src="/aurapops/app.js?v=20261002-large-images"></script>
+  <script src="/aurapops/app.js?v=20261002-account-state"></script>
 </body>
 </html>

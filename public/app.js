@@ -172,5 +172,33 @@
   $("verifyBuilderEmail").onclick=async()=>{const b=$("verifyBuilderEmail");b.disabled=true;try{const r=await fetch(API+"/account/verification/confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:$("builderVerificationCode").value})});const d=await r.json();if(!r.ok)throw new Error(d.error);$("builderVerification").hidden=true;$("signedInCustomer").hidden=false;$("signedInCustomer").textContent="Email verified · "+d.user.email;await restore();notice("Email verified. Now save your page to prepare the QR.","success");}catch(e){notice(e.message,"error");}finally{b.disabled=false;}};
   $("resendBuilderCode").onclick=async()=>{const b=$("resendBuilderCode");b.disabled=true;try{const r=await fetch(API+"/account/verification/send",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});const d=await r.json();if(!r.ok)throw new Error(d.error);notice("New code sent. Use the latest email.","success");}catch(e){notice(e.message,"error");}finally{b.disabled=false;}};
   renderRows();renderPreview();restore();
-  fetch(API+"/account/session").then(r=>r.json()).then(d=>{if(d.user){$("customerAccountFields").hidden=true;$("signedInCustomer").hidden=false;$("signedInCustomer").textContent="Signed in as "+d.user.name+" · "+d.user.email;}}).catch(()=>{});
+  let sessionCheck;
+  function refreshAccount(){
+    if(sessionCheck)return sessionCheck;
+    sessionCheck=(async()=>{
+      try{
+        const r=await fetch(API+"/account/session",{cache:"no-store",credentials:"same-origin"});
+        if(!r.ok)throw new Error("Could not check your account.");
+        const d=await r.json(), signedIn=!!d.user, verifying=!!d.verificationRequired;
+        $("customerAccountFields").hidden=signedIn||verifying;
+        $("signedInCustomer").hidden=!signedIn;
+        $("builderVerification").hidden=!verifying;
+        if(signedIn){
+          $("signedInCustomer").textContent="Signed in as "+d.user.name+" · Your AuraPop will be saved to your account.";
+          $("customerPassword").value="";$("customerConfirmPassword").value="";
+        }
+        if(verifying)$("builderVerificationEmail").textContent="Enter the code sent to "+(d.email||"your email")+" before saving your page.";
+        $("accountCheckStatus").hidden=true;
+      }catch{
+        $("customerAccountFields").hidden=true;
+        $("accountCheckStatus").hidden=false;
+        $("accountCheckStatus").textContent="Could not check your sign-in. Return to this tab or refresh to try again.";
+      }finally{sessionCheck=null;}
+    })();
+    return sessionCheck;
+  }
+  refreshAccount();
+  window.addEventListener("focus",refreshAccount);
+  window.addEventListener("pageshow",refreshAccount);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshAccount();});
 })();
