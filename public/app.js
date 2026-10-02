@@ -1,3 +1,4 @@
+import {openGame} from './games.js?v=20261003';
 (() => {
   const form=document.getElementById("popBuilder");
   if(!form)return;
@@ -84,8 +85,9 @@
     preview.style.backgroundColor=bg;preview.style.backgroundImage=mode==="image"&&state.backgroundUrl?`linear-gradient(rgba(2,8,4,.14),rgba(2,8,4,.46)),url("${state.backgroundUrl}")`:"none";
     if(state.avatarUrl)avatar.innerHTML=`<img src="${state.avatarUrl}" alt="">`;
     else {const ini=title.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase()||"AP";avatar.innerHTML=`<span>${esc(ini)}</span>`;}
-    previewLinks.innerHTML=state.links.length?state.links.map(item=>`<div class="preview-link"><i>${esc(presets[item.type]?.[1]||"↗")}</i><span>${esc(item.label||"Open")}</span></div>`).join(""):'<div class="empty">Add your first item.</div>';
+    previewLinks.innerHTML=state.links.length?state.links.map(item=>`<button type="button" class="preview-link" data-preview-type="${esc(item.type)}"><i>${esc(presets[item.type]?.[1]||"↗")}</i><span>${esc(item.label||"Open")}</span></button>`).join(""):'<div class="empty">Add your first item.</div>';
   }
+  previewLinks.addEventListener("click",e=>{const type=e.target.closest("[data-preview-type]")?.dataset.previewType;if(isGame(type))openGame(type);});
   function validate(){
     if(!String(form.elements.title.value||"").trim())throw new Error("Add a name.");
     if(!state.id&&slug(form.elements.slug.value).length<3)throw new Error("Choose a longer AuraPop address.");
@@ -109,7 +111,10 @@
   }
   async function privateImage(url){
     if(!url)return "";
-    const r=await fetch(url,{headers:{"X-AuraPop-Token":state.token}});if(!r.ok)return "";
+    const resolved=new URL(url,location.origin);
+    if(!/^\/api\/aurapops\/images\/[a-f0-9-]+$/i.test(resolved.pathname))throw new Error("Invalid saved image address.");
+    const headers={};if(state.token)headers["X-AuraPop-Token"]=state.token;
+    const r=await fetch(resolved.pathname,{headers,credentials:"same-origin",cache:"no-store"});if(!r.ok)throw new Error("Your saved picture could not load. Refresh to try again.");
     return URL.createObjectURL(await r.blob());
   }
   function showActivation(pop){
@@ -133,8 +138,10 @@
       form.elements.title.value=pop.title||"";form.elements.slug.value=pop.slug||"";form.elements.slug.readOnly=true;form.elements.subtitle.value=pop.subtitle||"";
       form.elements.backgroundColor.value=pop.backgroundColor||"#0b1610";form.elements.cardColor.value=pop.cardColor||"#111a16";form.elements.textColor.value=pop.textColor||"#ffffff";form.elements.accentColor.value=pop.accentColor||"#e1e100";
       [...form.elements.backgroundMode].forEach(x=>x.checked=x.value===pop.backgroundMode);$("backgroundUploadWrap").hidden=pop.backgroundMode!=="image";
-      revoke("avatarUrl");revoke("backgroundUrl");state.avatarUrl=await privateImage(pop.avatarUrl);state.backgroundUrl=await privateImage(pop.backgroundImageUrl);
-      $("savePop").textContent="Save AuraPop changes";$("savePop").disabled=false;$("newPop").hidden=false;renderRows();renderPreview();showActivation(pop);notice("Draft restored.","success");
+      revoke("avatarUrl");revoke("backgroundUrl");const images=await Promise.allSettled([privateImage(pop.avatarUrl),privateImage(pop.backgroundImageUrl)]);
+      state.avatarUrl=images[0].status==='fulfilled'?images[0].value:'';state.backgroundUrl=images[1].status==='fulfilled'?images[1].value:'';
+      const imageError=images.some(result=>result.status==='rejected');
+      $("savePop").textContent="Save AuraPop changes";$("savePop").disabled=false;$("newPop").hidden=false;renderRows();renderPreview();showActivation(pop);notice(imageError?"Draft restored, but a saved picture could not load. Refresh to retry.":"Draft restored.",imageError?"error":"success");
     }catch{localStorage.removeItem(STORE);state.id="";state.token="";if(requested){notice("Sign in to edit this page.","error");$("savePop").disabled=true;}}
   }
 

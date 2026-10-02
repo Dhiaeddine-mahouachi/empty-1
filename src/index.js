@@ -368,7 +368,10 @@ async function api(request,env) {
       }
     }
     if(!allowed) return new Response("Not found.",{status:404});
-    return new Response(request.method==="HEAD"?null:image.image_bytes,{status:200,headers:{"Content-Type":image.content_type,"Cache-Control":allowed&&image.status==="approved"?"public, max-age=3600":"no-store"}});
+    // D1 returns BLOB columns as number arrays. Response(array) stringifies
+    // them ("137,80,78,...") instead of returning decodable image bytes.
+    const bytes=Array.isArray(image.image_bytes)?Uint8Array.from(image.image_bytes):image.image_bytes;
+    return new Response(request.method==="HEAD"?null:bytes,{status:200,headers:{"Content-Type":image.content_type,"Content-Length":String(bytes.byteLength),"Cache-Control":"no-store"}});
   }
 
   const publicMatch=url.pathname.match(/^\/api\/aurapops\/public\/([a-z0-9-]+)$/i);

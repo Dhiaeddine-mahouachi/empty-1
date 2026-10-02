@@ -73,3 +73,17 @@ test('AuraMenu verified ownership and paid editing rules stay intact',async()=>{
  const create=await menuCall('/api/auramenu/requests','POST',{email:'forged@example.com'},owner);assert.equal(create.status,201);assert.equal((await create.json()).request.email,'menu-owner@example.com');
  assert.equal((await menuCall('/api/auramenu/requests','POST',{email:'anonymous@example.com'})).status,403);
 });
+
+test('saved images return exact binary bytes for owner preview and public pop, never to other users',async()=>{
+ const owner=await register('Image owner','image-owner@example.com'),other=await register('Other viewer','image-other@example.com');
+ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=','base64');
+ const created=await call('/api/aurapops/pops','POST',{title:'Image test',slug:'image-test',backgroundMode:'image',avatarData:'data:image/png;base64,'+png.toString('base64'),backgroundData:'data:image/png;base64,'+png.toString('base64'),links:[]},owner);
+ assert.equal(created.status,201);const {pop}=await created.json();
+ // Match the production D1 BLOB representation; SQLite alone returns Uint8Array.
+ const d1db={...db,prepare(query){const statement=db.prepare(query),first=statement.first;statement.first=async function(){const row=await first.call(this);if(row?.image_bytes)row.image_bytes=Array.from(row.image_bytes);return row;};return statement;}};
+ const image=async(url,cookie='',method='GET')=>worker.fetch(new Request(url,{method,headers:{Cookie:cookie}}),{...env,DB:d1db});
+ for(const url of [pop.avatarUrl,pop.backgroundImageUrl]){assert.equal((await image(url)).status,404);assert.equal((await image(url,other)).status,404);const response=await image(url,owner);assert.equal(response.status,200);assert.equal(response.headers.get('Content-Type'),'image/png');assert.deepEqual(Buffer.from(await response.arrayBuffer()),png);}
+ sql.prepare("UPDATE aurapops SET status='approved',payment_status='paid' WHERE id=?").run(pop.id);
+ for(const url of [pop.avatarUrl,pop.backgroundImageUrl]){const response=await image(url);assert.equal(response.status,200);assert.deepEqual(Buffer.from(await response.arrayBuffer()),png);const head=await image(url,'','HEAD');assert.equal(head.status,200);assert.equal(head.headers.get('Content-Length'),String(png.length));assert.equal((await head.arrayBuffer()).byteLength,0);}
+ sql.prepare("UPDATE aurapops SET status='pending' WHERE id=?").run(pop.id);assert.equal((await image(pop.avatarUrl)).status,404);
+});

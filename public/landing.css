@@ -103,7 +103,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   content:"";
   position:absolute;
   inset:14%;
-  background:url("/brand/ap-customize-2026.webp") center/cover no-repeat;
+  background:url("/brand/ap-customize-v3.webp") center/cover no-repeat;
   filter:blur(34px);
   opacity:.18;
   transform:scale(1.25);
@@ -134,7 +134,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   z-index:-2;
   background:
     linear-gradient(180deg,rgba(4,12,8,.3),rgba(4,12,8,.88)),
-    url("/brand/connect.webp") center/cover no-repeat;
+    url("/brand/ap-share-v3.webp") center/cover no-repeat;
   filter:saturate(.72);
 }
 .how-media-ready:after{
@@ -197,7 +197,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 .use-cases-ambient{
   position:absolute;
   inset:-35%;
-  background:url("/brand/ap-use-cases-2026.webp") center/cover no-repeat;
+  background:url("/brand/ap-customize-v3.webp") center/cover no-repeat;
   filter:blur(48px);
   opacity:.12;
   transform:scale(1.12);
@@ -256,3 +256,11 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
   .use-cases-frame{padding:7px;border-radius:18px;overflow-x:auto}
   .use-cases-frame img{width:760px;max-width:none;border-radius:12px}
 }
+
+/* Full-resolution product artwork, with the same composition on every screen. */
+.hero-stage{padding:0;aspect-ratio:1;min-height:0;overflow:hidden;background:#06110d;border-radius:30px}
+.hero-stage img{display:block;width:100%;max-width:100%;height:auto;border-radius:0;object-fit:contain}
+.visual-story{padding:36px;gap:32px}.native-mockup{margin:0;padding:0;overflow:hidden;background:#06110d;min-height:0}.native-mockup img{display:block;width:100%;max-width:100%;height:auto;border-radius:20px}
+.how-media-ready{height:auto;min-height:0;padding:0;background:#06110d;overflow:hidden}.ready-card{margin:0;padding:0;border:0;width:100%;max-width:100%;background:transparent;box-shadow:none}.ready-card img{display:block;width:100%;max-width:100%;height:auto;border-radius:24px}.ready-caption{padding:12px;gap:8px}.ready-caption span{font-size:12px}
+.use-cases-stage{padding:0 0 24px;min-height:0;gap:16px}.use-cases-frame{width:min(100%,1000px);padding:0;border:0;background:transparent;box-shadow:none;overflow:hidden}.use-cases-frame img{display:block;width:100%;max-width:100%;height:auto;border-radius:0}.use-case-tags span{font-size:14px}.use-cases-ambient{display:none}
+@media(max-width:760px){.hero-stage{min-height:0;aspect-ratio:1;margin-top:8px}.hero-stage img{width:100%;max-width:100%}.visual-story{padding:22px 16px}.native-mockup{min-height:0}.native-mockup img{width:100%;max-width:100%}.how-media-ready{height:auto;padding:0}.use-cases-frame img{width:100%;max-width:100%}.use-case-tags{padding-inline:12px;gap:6px}.use-case-tags span{padding:7px 10px;font-size:12px}}

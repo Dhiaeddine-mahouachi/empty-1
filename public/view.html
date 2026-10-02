@@ -6,11 +6,12 @@
   <meta name="theme-color" content="#06110d">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>AuraPop</title>
-  <link rel="stylesheet" href="/aurapops/view.css?v=20261002-minimal">
+  <link rel="stylesheet" href="/aurapops/view.css?v=20261003">
   <link rel="icon" type="image/x-icon" href="/favicon.ico?v=20261002">
   <link rel="icon" type="image/png" sizes="32x32" href="/brand/icon-32.png?v=20261002">
   <link rel="apple-touch-icon" sizes="180x180" href="/brand/icon-180.png">
   <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/games.css?v=20261003">
 </head>
 <body>
   <main class="shell" id="shell">
@@ -26,15 +27,6 @@
     </article>
   </main>
 
-  <section class="game-layer" id="gameLayer" aria-hidden="true">
-    <div class="game-card" role="dialog" aria-modal="true" aria-labelledby="gameTitle">
-      <div class="game-head"><h2 id="gameTitle">Game</h2><button id="closeGame" type="button" aria-label="Close">×</button></div>
-      <p class="score" id="gameScore">Score: 0</p>
-      <div class="canvas-wrap"><canvas id="gameCanvas" width="300" height="300"></canvas></div>
-      <div class="controls" id="gameControls"></div>
-      <button class="restart" id="restartGame" type="button">Restart</button>
-    </div>
-  </section>
-  <script src="/aurapops/view.js"></script>
+  <script type="module" src="/aurapops/view.js?v=20261003"></script>
 </body>
 </html>
