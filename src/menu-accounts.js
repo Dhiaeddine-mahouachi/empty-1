@@ -6,8 +6,9 @@ export async function handleMenuAccounts(request,env){
  const user=await customerSession(request,env.DB);
  if(path==='/api/aurapops/account/menus'){
   if(!user?.emailVerified)throw new CustomerError(403,'Sign in and verify your email to open your menus.');
-  const rows=await env.DB.prepare('SELECT id,slug,business_name,status,payment_status,updated_at FROM auramenu_requests WHERE lower(trim(email))=? ORDER BY created_at DESC').bind(user.email).all();
-  return json({items:rows.results.map(r=>({id:r.id,slug:r.slug,title:r.business_name,status:r.status,paymentStatus:r.payment_status,publicUrl:'https://auramenu.space/'+r.slug,updatedAt:r.updated_at}))});
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS auramenu_billing (menu_id TEXT PRIMARY KEY NOT NULL,plan_id TEXT NOT NULL,amount INTEGER NOT NULL,interval TEXT NOT NULL,hosting_amount INTEGER NOT NULL DEFAULT 0,paid_until TEXT,updated_at TEXT NOT NULL DEFAULT (datetime('now')))").run();
+  const rows=await env.DB.prepare('SELECT r.id,r.slug,r.business_name,r.status,r.payment_status,r.updated_at,b.plan_id,b.amount,b.interval,b.hosting_amount,b.paid_until FROM auramenu_requests r LEFT JOIN auramenu_billing b ON b.menu_id=r.id WHERE lower(trim(r.email))=? ORDER BY r.created_at DESC').bind(user.email).all();
+  return json({items:rows.results.map(r=>({id:r.id,slug:r.slug,title:r.business_name,status:r.status,paymentStatus:r.payment_status,publicUrl:'https://auramenu.space/'+r.slug,updatedAt:r.updated_at,billing:r.plan_id?{planId:r.plan_id,amount:r.amount,interval:r.interval,hostingAmount:r.hosting_amount,paidUntil:r.paid_until,active:Boolean(r.paid_until&&Date.parse(r.paid_until)>Date.now())}:null}))});
  }
  if(!path.startsWith('/api/auramenu/'))return null;
  if(request.method==='OPTIONS')return new Response(null,{status:204});
@@ -17,7 +18,7 @@ export async function handleMenuAccounts(request,env){
   if(!user?.emailVerified)throw new CustomerError(403,'Verify your email before submitting your menu.');
   const text=await request.text();if(text.length>5*1024*1024)throw new CustomerError(413,'Request too large.');let data;try{data=JSON.parse(text);}catch{throw new CustomerError(400,'Invalid request.');}data.email=user.email;payload=JSON.stringify(data);headers.set('Content-Type','application/json');
  }
- const match=path.match(/^\/api\/auramenu\/dashboard\/([a-f0-9-]+)(?:\/(?:claim|access-request))?$/i);
+ const match=path.match(/^\/api\/auramenu\/(?:dashboard|requests)\/([a-f0-9-]+)(?:\/(?:claim|access-request))?$/i);
  if(match){
   if(!user?.emailVerified)throw new CustomerError(403,'Sign in and verify your email to open your menu.');
   const row=await env.DB.prepare('SELECT id,email FROM auramenu_requests WHERE id=?').bind(match[1]).first();
