@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check src/index.js && node --check public/app.js && node --check public/view.js && node --check public/admin.js",
+    "check": "node --check src/index.js && node --check public/app.js && node --check public/view.js && node --check public/admin.js && node --check public/landing.js",
     "deploy:check": "wrangler deploy --dry-run --outdir .wrangler/dry-run",
     "deploy": "wrangler deploy"
   },

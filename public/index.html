@@ -6,19 +6,24 @@
   <meta name="theme-color" content="#070a0a">
   <title>AuraPops — One QR. Infinite Possibilities.</title>
   <meta name="description" content="Create beautiful pop-up link pages, activate them with a QR code, and share links, socials, menus, maps, files and mini-games from one place.">
-  <link rel="stylesheet" href="/landing.css">
+  <link rel="stylesheet" href="/landing.css?v=20261002">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico?v=20261002">
+  <link rel="icon" type="image/png" sizes="32x32" href="/brand/icon-32.png?v=20261002">
+  <link rel="apple-touch-icon" sizes="180x180" href="/brand/icon-180.png">
+  <link rel="manifest" href="/manifest.webmanifest">
 </head>
 <body>
   <section class="hero" id="home">
     <header class="topbar shell">
-      <a class="brand" href="#home" aria-label="AuraPops home"><span class="ap-mark" aria-hidden="true"><i></i></span><span>AuraPops</span></a>
-      <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="#home" aria-label="AuraPops home"><img class="ap-mark" src="/brand/aurapops-mark.png" alt="" width="48" height="25"><span>AuraPops</span></a>
+      <nav id="primary-nav" class="nav" aria-label="Primary navigation">
         <a class="active" href="#home">Home</a><a href="#features">Features</a><a href="#templates">Templates</a><a href="#pricing">Pricing</a><a href="#about">About</a>
       </nav>
       <div class="top-actions">
         <a class="cta outline" href="/aurapops/admin">Login</a>
         <a class="cta primary" href="/builder.html">Get Started</a>
       </div>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" aria-label="Open menu">☰</button>
     </header>
 
     <div class="hero-grid shell">
@@ -27,27 +32,17 @@
         <h1>One QR.<span>Infinite Possibilities.</span></h1>
         <p>Turn any moment into a connection. Create beautiful pop-up link pages, activate them with a QR code, and share everything you do — links, socials, menus, maps, files, games and more.</p>
         <div class="hero-buttons">
-          <a class="cta primary" href="/builder.html">Get Started Free <span>→</span></a>
-          <a class="cta outline" href="#interactive"><span class="trust-icon">▶</span> Watch Video</a>
+          <a class="cta primary" href="/builder.html">Get Started Free</a>
+          <a class="cta outline" href="#interactive"><span class="trust-icon">▶</span> See It in Action</a>
         </div>
         <div class="hero-trust">
           <span><i class="trust-icon">⚡</i> Set up in minutes</span>
           <span><i class="trust-icon">▣</i> No app required</span>
-          <span><i class="trust-icon">●</i> Loved by 5,000+ creators</span>
+          <span><i class="trust-icon">●</i> Made for creators</span>
         </div>
       </div>
 
-      <div class="hero-visual" aria-label="AuraPops mobile profile preview">
-        <div class="qr-stand"><div class="qr"></div><small>Scan to<br>connect</small></div>
-        <div class="hero-phone">
-          <div class="phone-logo">AP</div>
-          <div class="avatar-demo"></div>
-          <div class="demo-name">sarah.j ✦</div>
-          <div class="demo-sub">Content Creator<br>Travel · Food · Good Vibes</div>
-          <div class="demo-links"><span>Instagram</span><span>YouTube</span><span>My Blog</span><span>Location</span><span>Play a Game</span></div>
-          <div class="phone-social"><span>♪</span><span>𝕏</span><span>●</span><span>✉</span></div>
-        </div>
-      </div>
+      <div class="hero-visual"><img src="/brand/hero.webp" alt="A personalized AuraPops profile with frosted links next to a QR display in a café" width="481" height="394" fetchpriority="high"></div>
     </div>
   </section>
 
@@ -60,16 +55,16 @@
             <h2>More Than a Link in Bio.</h2>
             <p>Design stunning pop-up pages with your own style. Add links, menus, social profiles, locations, files, and even mini-games. All activated by a simple QR code.</p>
           </div>
-          <a class="cta dark" href="/builder.html">Explore All Features →</a>
+          <a class="cta dark" href="/builder.html">Explore All Features</a>
         </div>
 
         <div class="feature-grid" id="templates">
-          <article class="feature-card"><div class="feature-icon">♙</div><h3>Customizable<br>Profiles</h3><p>Your style, your rules. Personalize avatars, names, bios and more.</p><div class="mini-device"><div class="mini-avatar"></div><div class="demo-name">sarah.j ✦</div><div class="demo-sub">Content Creator</div></div></article>
-          <article class="feature-card"><div class="feature-icon">▧</div><h3>Beautiful<br>Backgrounds</h3><p>Choose from gradients, photos, videos or animated themes.</p><div class="bg-stack"><i></i><i></i></div></article>
-          <article class="feature-card"><div class="feature-icon">▣</div><h3>Links, Menus<br>& More</h3><p>Add unlimited links, socials, menus, maps, files and custom buttons.</p><div class="mini-device"><div class="mini-lines"><i></i><i></i><i></i><i></i></div></div></article>
-          <article class="feature-card"><div class="feature-icon">🎮</div><h3>Built-in<br>Mini Games</h3><p>Keep your audience engaged with fun games like Snake, Tetris and more.</p><div class="game-screen"><b>SCORE 42</b><div class="game-board"></div></div></article>
-          <article class="feature-card"><div class="feature-icon">▦</div><h3>QR Code<br>Activation</h3><p>Generate a beautiful QR code that instantly opens your pop-up page.</p><div class="qr-card"><div class="qr"></div><span>Download QR</span></div></article>
-          <article class="feature-card"><div class="feature-icon">▣</div><h3>Powerful<br>Dashboard</h3><p>Manage everything from one place. Update links, track views, and customize anytime.</p><div class="dash-screen"><b><span class="ap-mark" aria-hidden="true"><i></i></span> AuraPops</b><i></i><i></i><i></i><i></i><i></i></div></article>
+<article class="feature-card"><header><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="4"/><path d="M4 22v-3a8 8 0 0 1 16 0v3Z"/></svg></div><h3>Customizable Profiles</h3></header><p>Make it yours with custom colors, themes and your own style.</p><img class="feature-art" src="/brand/feature-0.webp" alt="Customizable Profiles example" width="145" height="179" loading="lazy"></article>
+          <article class="feature-card"><header><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="1"/><path d="m3 17 6-6 4 4 3-3 5 5"/></svg></div><h3>Beautiful Backgrounds</h3></header><p>Choose a photo or color to make your page feel like you.</p><img class="feature-art" src="/brand/feature-1.webp" alt="Beautiful Backgrounds example" width="145" height="179" loading="lazy"></article>
+          <article class="feature-card"><header><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="12" height="12" rx="3"/><rect x="9" y="2" width="12" height="12" rx="3"/></svg></div><h3>All Your Links</h3></header><p>Add socials, menus, maps and custom links in one place.</p><img class="feature-art" src="/brand/feature-2.webp" alt="All Your Links example" width="145" height="179" loading="lazy"></article>
+          <article class="feature-card"><header><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10c3 0 4 4 5 10 1 4-3 5-5 2l-2-2H9l-2 2c-2 3-6 2-5-2 1-6 2-10 5-10Z"/><path d="M6 10v6m-3-3h6m7-2h.1m3 3h.1"/></svg></div><h3>Built-in Mini Games</h3></header><p>Keep your audience engaged with playable Snake and Tetris.</p><img class="feature-art" src="/brand/feature-3.webp" alt="Built-in Mini Games example" width="145" height="179" loading="lazy"></article>
+          <article class="feature-card"><header><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="7" height="7" rx="1"/><rect x="15" y="2" width="7" height="7" rx="1"/><rect x="2" y="15" width="7" height="7" rx="1"/><path d="M15 15h7v7h-7z"/></svg></div><h3>QR Code Activation</h3></header><p>Prepare your QR code and activate your page after payment.</p><img class="feature-art" src="/brand/feature-4.webp" alt="QR Code Activation example" width="145" height="179" loading="lazy"></article>
+          <article class="feature-card"><header><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 22V12m8 10V6m8 16V2"/></svg></div><h3>Powerful Dashboard</h3></header><p>Manage your page, update links and customize anytime.</p><img class="feature-art" src="/brand/feature-5.webp" alt="Powerful Dashboard example" width="145" height="179" loading="lazy"></article>
         </div>
       </div>
     </section>
@@ -81,10 +76,7 @@
           <h2>Scan.<br>Tap.<span>Connect.</span></h2>
           <p>From cafés and events to social meetups and your business — AuraPops turns any moment into a lasting connection.</p>
         </div>
-        <div class="interactive-middle">
-          <div class="floating-links"><span>◎ Follow on Instagram</span><span>🍴 View Menu</span><span>● Get Directions</span><span>🎮 Play Tetris</span></div>
-          <div class="connect-phone"><div class="connect-avatar"></div><div class="demo-name">alex.t ✦</div><div class="demo-sub">Photographer<br>Capturing Life’s Moments</div><div class="mini-lines"><i></i><i></i><i></i><i></i></div></div>
-        </div>
+        <div class="interactive-middle"><img src="/brand/connect.webp" alt="Scan, tap and connect with social profiles, menus, directions and games" width="593" height="245" loading="lazy"></div>
         <div class="interactive-copy right">
           <span class="eyebrow">MORE THAN LINKS</span>
           <h2>Make It<span>Interactive.</span></h2>
@@ -93,15 +85,7 @@
       </div>
     </section>
 
-    <section class="stats">
-      <div class="stats-grid shell">
-        <div class="stat">Trusted by amazing<br>creators and businesses</div>
-        <div class="stat"><strong>5,000+</strong><span>Active Users</span></div>
-        <div class="stat"><strong>2M+</strong><span>Profile Views</span></div>
-        <div class="stat"><strong>98%</strong><span>Customer Satisfaction</span></div>
-        <div class="stat"><strong>24/7</strong><span>Support</span></div>
-      </div>
-    </section>
+    <section class="stats" aria-label="AuraPops at a glance"><div class="stats-grid shell"><div class="stat"><strong>Your style</strong><span>Personalized pages</span></div><div class="stat"><strong>All your links</strong><span>One place to connect</span></div><div class="stat"><strong>One QR</strong><span>Scan to open</span></div><div class="stat"><strong>Any device</strong><span>No app required</span></div></div></section>
 
     <section class="pricing" id="pricing">
       <div class="pricing-grid shell">
@@ -109,23 +93,24 @@
           <span class="eyebrow">SIMPLE, TRANSPARENT PRICING</span>
           <h2>Choose the<br>plan that fits you.</h2>
           <p>Everything you need to create, customize and share your pop-up pages. No hidden fees.</p>
-          <div class="price-tabs"><span class="active">Monthly</span><span>Yearly</span><span class="save">Save 20%</span></div>
+          <div class="price-tabs" aria-label="Billing period"><button class="active" type="button" data-billing="monthly" aria-pressed="true">Monthly</button><button type="button" data-billing="yearly" aria-pressed="false">Yearly</button><span class="save">Save 20%</span></div><small class="pricing-note">Plan preview. Confirm payment and activation with AuraDigital.</small>
         </div>
-        <article class="price-card"><h3>♙ &nbsp;Starter</h3><small>Perfect for getting started.</small><div class="price">$9 <span>/month</span></div><ul><li>1 pop-up page</li><li>Basic customization</li><li>Standard links & buttons</li><li>Built-in mini games</li><li>QR code generation</li></ul><a class="cta dark" href="/builder.html">Get Started</a></article>
-        <article class="price-card popular"><span class="badge">Most Popular</span><h3>♛ &nbsp;Pro</h3><small>Great for creators and businesses.</small><div class="price">$19 <span>/month</span></div><ul><li>Unlimited pop-up pages</li><li>Advanced customization</li><li>Menus, maps, files & more</li><li>Premium backgrounds</li><li>Analytics and insights</li><li>Priority support</li></ul><a class="cta primary" href="/builder.html">Get Started</a></article>
-        <article class="price-card"><h3>▥ &nbsp;Business</h3><small>For teams and brands.</small><div class="price">$49 <span>/month</span></div><ul><li>Everything in Pro</li><li>Team members</li><li>Custom domain (coming soon)</li><li>Advanced analytics</li><li>API access (coming soon)</li><li>Dedicated support</li></ul><a class="cta dark" href="/builder.html">Get Started</a></article>
+        <article class="price-card"><h3>♙ &nbsp;Starter</h3><small>Perfect for getting started.</small><div class="price"><b data-month="9">$9</b> <span>/month</span></div><ul><li>1 pop-up page</li><li>Basic customization</li><li>Standard links & buttons</li><li>Built-in mini games</li><li>QR code generation</li></ul><a class="cta dark" href="/builder.html">Get Started</a></article>
+        <article class="price-card popular"><span class="badge">Most Popular</span><h3>♛ &nbsp;Pro</h3><small>Great for creators and businesses.</small><div class="price"><b data-month="19">$19</b> <span>/month</span></div><ul><li>Unlimited pop-up pages</li><li>Advanced customization</li><li>Menus, maps, files & more</li><li>Premium backgrounds</li><li>Analytics and insights</li><li>Priority support</li></ul><a class="cta primary" href="/builder.html">Get Started</a></article>
+        <article class="price-card"><h3>▥ &nbsp;Business</h3><small>For teams and brands.</small><div class="price"><b data-month="49">$49</b> <span>/month</span></div><ul><li>Everything in Pro</li><li>Team members</li><li>Custom domain (coming soon)</li><li>Advanced analytics</li><li>API access (coming soon)</li><li>Dedicated support</li></ul><a class="cta dark" href="/builder.html">Get Started</a></article>
       </div>
     </section>
   </main>
 
   <footer class="footer" id="about">
     <div class="footer-grid shell">
-      <div><a class="brand" href="#home"><span class="ap-mark" aria-hidden="true"><i></i></span><span>AuraPops</span></a><p>Smart pop-up link pages for a more connected world.</p><small>© 2026 AuraPops. All rights reserved.</small></div>
+      <div><a class="brand" href="#home"><img class="ap-mark" src="/brand/aurapops-mark.png" alt="" width="48" height="25"><span>AuraPops</span></a><p>Smart pop-up link pages for a more connected world.</p><small>© 2026 AuraPops. All rights reserved.</small></div>
       <div><h4>Product</h4><div class="footer-links"><a href="#features">Features</a><a href="#templates">Templates</a><a href="#pricing">Pricing</a><a href="/builder.html">What’s New</a></div></div>
       <div><h4>Company</h4><div class="footer-links"><a href="#about">About</a><a href="https://auradigitalworks.com/">AuraDigital</a><a href="https://auradigitalworks.com/contact">Contact</a></div></div>
       <div><h4>Resources</h4><div class="footer-links"><a href="/builder.html">Help Center</a><a href="/builder.html">Guides</a><a href="/aurapops/admin">Admin</a><a href="/api/aurapops/health">Status</a></div></div>
-      <div><h4>Stay in the loop</h4><p>Get product updates and pop-up inspiration.</p><div class="subscribe"><input type="email" placeholder="Your email address" aria-label="Email address"><button type="button">Subscribe</button></div><div class="socials"><span>◎</span><span>♪</span><span>𝕏</span><span>▶</span></div></div>
+      <div><h4>Stay in the loop</h4><p>Talk to AuraDigital about your page.</p><a class="cta primary" href="https://auradigitalworks.com/contact">Let’s Talk</a><div class="socials"><span>◎</span><span>♪</span><span>𝕏</span><span>▶</span></div></div>
     </div>
   </footer>
+<script src="/landing.js?v=20261002"></script>
 </body>
 </html>
