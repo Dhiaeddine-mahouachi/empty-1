@@ -1,3 +1,4 @@
+import { handleMenuAccounts } from './menu-accounts.js';
 import { CustomerError, ensureCustomers, customerSession, customerOwns, customerApi } from './customer.js';
 const MAX_BODY = 1400 * 1024;
 const IMAGE_BYTES = 420 * 1024;
@@ -22,6 +23,11 @@ export default {
 
       const url = new URL(request.url);
       let response;
+      const menuHost=['auramenu.space','www.auramenu.space'].includes(url.hostname);
+      if(menuHost&&['/login','/login/','/account','/account/'].includes(url.pathname)) {
+        response=await env.ASSETS.fetch(new Request(new URL('/menu-account.html',url),request));return secure(response,request);
+      }
+      if(menuHost&&url.pathname.startsWith('/api/auramenu/')){await ensureSchema(env.DB);response=await handleMenuAccounts(request,env);return secure(response,request);}
       const agencyHost = ["auradigitalworks.com", "www.auradigitalworks.com"].includes(url.hostname);
       if (agencyHost && ["/aurapops", "/aurapops/"].includes(url.pathname) && ["GET", "HEAD"].includes(request.method)) {
         response = await env.ASSETS.fetch(new Request(new URL("/showcase.html", url), request));
@@ -152,7 +158,7 @@ function secure(response, request) {
   } else if(!h.has("Content-Security-Policy")) {
     h.set("Content-Security-Policy","default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
   }
-  if(new URL(request.url).pathname.startsWith("/api/aurapops/")) h.set("Cache-Control","no-store");
+  if(new URL(request.url).pathname.startsWith("/api/")) h.set("Cache-Control","no-store");
   return new Response(response.body,{status:response.status,statusText:response.statusText,headers:h});
 }
 async function requestPolicy(request, env) {
@@ -278,6 +284,7 @@ async function api(request,env) {
   await ensureSchema(env.DB);
   const url=new URL(request.url);
 
+  if(url.pathname==="/api/aurapops/account/menus") return handleMenuAccounts(request,env);
   if(url.pathname.startsWith("/api/aurapops/account/")) return customerApi(request,env,mapPop);
 
   if(url.pathname==="/api/aurapops/health"&&request.method==="GET") return json({ok:true,service:"aurapops"});
@@ -372,6 +379,8 @@ async function api(request,env) {
 
   if(url.pathname==="/api/aurapops/pops"&&request.method==="POST") {
     if(!sameOrigin(request)) return json({error:"Invalid request origin."},403);
+    const customer=await customerSession(request,env.DB);
+    if(!customer?.emailVerified) return json({error:'Sign in and verify your email before saving a page.'},403);
     const body=await readJson(request);
     const p=normalizePop(body);
     let slug=slugify(body.slug||p.title);
@@ -385,7 +394,6 @@ async function api(request,env) {
       const background=await replaceImage(env.DB,id,"background",p.backgroundData,null);
       await env.DB.prepare("UPDATE aurapops SET avatar_image_id=?,background_image_id=? WHERE id=?").bind(avatar,background,id).run();
     } catch(error) { await env.DB.prepare("DELETE FROM aurapops WHERE id=?").bind(id).run(); throw error; }
-    const customer=await customerSession(request,env.DB);
     if(customer) await env.DB.prepare("INSERT INTO aurapops_ownership (pop_id,customer_id) VALUES (?,?)").bind(id,customer.id).run();
     const row=await env.DB.prepare("SELECT * FROM aurapops WHERE id=? LIMIT 1").bind(id).first();
     return json({pop:mapPop(row,url.origin,true),token:customer?null:raw},201,{"Cache-Control":"no-store"});

@@ -102,7 +102,7 @@
       form.elements.backgroundColor.value=pop.backgroundColor||"#0b1610";form.elements.cardColor.value=pop.cardColor||"#111a16";form.elements.textColor.value=pop.textColor||"#ffffff";form.elements.accentColor.value=pop.accentColor||"#e1e100";
       [...form.elements.backgroundMode].forEach(x=>x.checked=x.value===pop.backgroundMode);$("backgroundUploadWrap").hidden=pop.backgroundMode!=="image";
       revoke("avatarUrl");revoke("backgroundUrl");state.avatarUrl=await privateImage(pop.avatarUrl);state.backgroundUrl=await privateImage(pop.backgroundImageUrl);
-      $("savePop").textContent="Save AuraPop changes";$("newPop").hidden=false;renderRows();renderPreview();showActivation(pop);notice("Draft restored.","success");
+      $("savePop").textContent="Save AuraPop changes";$("savePop").disabled=false;$("newPop").hidden=false;renderRows();renderPreview();showActivation(pop);notice("Draft restored.","success");
     }catch{localStorage.removeItem(STORE);state.id="";state.token="";if(requested){notice("Sign in to edit this page.","error");$("savePop").disabled=true;}}
   }
 
@@ -118,10 +118,14 @@
     try{
       validate();
       let account=await (await fetch(API+"/account/session")).json();
+      if(account.verificationRequired){$("builderVerification").hidden=false;throw new Error("Enter the email verification code before saving your page.");}
       if(!account.user){
-        const r=await fetch(API+"/account/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:$("customerName").value,email:$("customerEmail").value,password:$("customerPassword").value})});
-        const d=await r.json();if(!r.ok)throw new Error(d.error||"Could not create your account.");account=d;$("customerPassword").value="";
+        if($("customerPassword").value!==$("customerConfirmPassword").value)throw new Error("Passwords do not match.");
+        const r=await fetch(API+"/account/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({confirmPassword:$("customerConfirmPassword").value,name:$("customerName").value,email:$("customerEmail").value,password:$("customerPassword").value})});
+        const d=await r.json();if(!r.ok)throw new Error(d.error||"Could not create your account.");account=d;$("customerPassword").value="";$("customerConfirmPassword").value="";
+        if(d.verificationRequired){$("builderVerification").hidden=false;$("customerAccountFields").hidden=true;$("builderVerificationEmail").textContent="Enter the code sent to "+d.email+". Your design stays here.";throw new Error("Code sent. Verify your email below, then prepare your QR.");}
       }
+      if(!account.user?.emailVerified){$("builderVerification").hidden=false;const r=await fetch(API+"/account/verification/send",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});const d=await r.json();throw new Error(r.ok?"Code sent. Verify your email below, then save your page.":d.error);}
       $("customerAccountFields").hidden=true;$("signedInCustomer").hidden=false;$("signedInCustomer").textContent="Saving to "+account.user.name+"’s account.";
       if(state.id&&state.token){const claim=await fetch(API+"/account/claim",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:state.id,token:state.token})});if(!claim.ok)throw new Error("This page could not be linked to your account.");state.token="";localStorage.removeItem(STORE);}
       const headers={"Content-Type":"application/json"};if(state.id)headers["X-AuraPop-Token"]=state.token;
@@ -132,6 +136,8 @@
     }catch(err){notice(err.message,"error");}finally{btn.disabled=false;}
   });
 
+  $("verifyBuilderEmail").onclick=async()=>{const b=$("verifyBuilderEmail");b.disabled=true;try{const r=await fetch(API+"/account/verification/confirm",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({code:$("builderVerificationCode").value})});const d=await r.json();if(!r.ok)throw new Error(d.error);$("builderVerification").hidden=true;$("signedInCustomer").hidden=false;$("signedInCustomer").textContent="Email verified · "+d.user.email;await restore();notice("Email verified. Now save your page to prepare the QR.","success");}catch(e){notice(e.message,"error");}finally{b.disabled=false;}};
+  $("resendBuilderCode").onclick=async()=>{const b=$("resendBuilderCode");b.disabled=true;try{const r=await fetch(API+"/account/verification/send",{method:"POST",headers:{"Content-Type":"application/json"},body:"{}"});const d=await r.json();if(!r.ok)throw new Error(d.error);notice("New code sent. Use the latest email.","success");}catch(e){notice(e.message,"error");}finally{b.disabled=false;}};
   renderRows();renderPreview();restore();
   fetch(API+"/account/session").then(r=>r.json()).then(d=>{if(d.user){$("customerAccountFields").hidden=true;$("signedInCustomer").hidden=false;$("signedInCustomer").textContent="Signed in as "+d.user.name+" · "+d.user.email;}}).catch(()=>{});
 })();

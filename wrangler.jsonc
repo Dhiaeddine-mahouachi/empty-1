@@ -28,6 +28,70 @@
     {
       "pattern": "www.aurapops.online/*",
       "zone_name": "aurapops.online"
+    },
+    {
+      "pattern": "auramenu.space/login*",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "auramenu.space/account",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "auramenu.space/account/",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "auramenu.space/account.css",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "auramenu.space/account.js",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "auramenu.space/brand/*",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "auramenu.space/api/aurapops/account/*",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "auramenu.space/api/auramenu/*",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "www.auramenu.space/login*",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "www.auramenu.space/account",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "www.auramenu.space/account/",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "www.auramenu.space/account.css",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "www.auramenu.space/account.js",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "www.auramenu.space/brand/*",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "www.auramenu.space/api/aurapops/account/*",
+      "zone_name": "auramenu.space"
+    },
+    {
+      "pattern": "www.auramenu.space/api/auramenu/*",
+      "zone_name": "auramenu.space"
     }
   ],
   "assets": {
@@ -42,7 +106,10 @@
       "/login",
       "/login/",
       "/dashboard",
-      "/dashboard/"
+      "/dashboard/",
+      "/account",
+      "/account/",
+      "/api/auramenu/*"
     ]
   },
   "d1_databases": [

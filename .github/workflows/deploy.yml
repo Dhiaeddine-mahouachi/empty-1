@@ -18,6 +18,7 @@ jobs:
           node-version: 22
       - run: npm install --ignore-scripts
       - run: npm run check
+      - run: npm test
       - run: npm run deploy:check
       - name: Check Cloudflare deploy credential
         env:
@@ -27,6 +28,17 @@ jobs:
             echo "::error title=Cloudflare deploy credential missing::CLOUDFLARE_API_TOKEN is not configured in this repository."
             exit 1
           fi
+      - name: Check verification email configuration
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx wrangler secret list > "$RUNNER_TEMP/aurapops-secret-names.json"
+          node -e 'const fs=require("fs"); const s=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/aurapops-secret-names.json","utf8")); if(!s.some(x=>x.name==="RESEND_API_KEY")){ console.error("Verification email setup missing: add RESEND_API_KEY to the aurapops Worker before publishing."); process.exit(1); } console.log("Verification email credential is configured.");'
+      - name: Check AuraMenu domain access
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module -e 'const r=await fetch("https://api.cloudflare.com/client/v4/zones?name=auramenu.space",{headers:{Authorization:"Bearer "+process.env.CLOUDFLARE_API_TOKEN}});const d=await r.json();if(!r.ok||!d.result?.some(z=>z.name==="auramenu.space")){console.error("Add auramenu.space to the Cloudflare API token Zone Resources before publishing.");process.exit(1);}console.log("AuraMenu domain access confirmed.");'
       - name: Deploy to Cloudflare
         run: npx wrangler deploy
         env:

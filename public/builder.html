@@ -85,9 +85,9 @@
             <p class="wide">Create your account to keep this page and manage it from any device. Already registered? <a href="/login" target="_blank" rel="noopener">Sign in in a new tab</a>, then save your page here.</p>
             <label>Your name<input id="customerName" autocomplete="name" maxlength="80"></label>
             <label>Email<input id="customerEmail" type="email" autocomplete="email" maxlength="254"></label>
-            <label class="wide">Choose a password<input id="customerPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128"><small>At least 10 characters.</small></label>
+            <label class="wide">Choose a password<input id="customerPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128"><small>At least 10 characters.</small></label><label class="wide">Confirm password<input id="customerConfirmPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128"></label>
           </div>
-          <p id="signedInCustomer" hidden></p>
+          <p id="signedInCustomer" hidden></p><section id="builderVerification" hidden><p id="builderVerificationEmail">Check your email for a six-digit code before saving your page.</p><label>Verification code<input id="builderVerificationCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6"></label><button id="verifyBuilderEmail" type="button">Verify email</button><button id="resendBuilderCode" type="button">Resend code</button></section>
           <div class="submit-row">
             <button class="primary" id="savePop" type="submit">Prepare AuraPop & QR</button>
             <span id="builderStatus"></span>
