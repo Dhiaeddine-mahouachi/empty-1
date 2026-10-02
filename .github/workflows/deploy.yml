@@ -39,35 +39,6 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           node --input-type=module -e 'const r=await fetch("https://api.cloudflare.com/client/v4/zones?name=auramenu.space",{headers:{Authorization:"Bearer "+process.env.CLOUDFLARE_API_TOKEN}});const d=await r.json();if(!r.ok||!d.result?.some(z=>z.name==="auramenu.space")){console.error("Add auramenu.space to the Cloudflare API token Zone Resources before publishing.");process.exit(1);}console.log("AuraMenu domain access confirmed.");'
-      - name: Connect AuraMenu account routes through its zone
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          node --input-type=module <<'JS'
-          import fs from 'node:fs';
-          const config=JSON.parse(fs.readFileSync('wrangler.jsonc','utf8'));
-          const headers={Authorization:'Bearer '+process.env.CLOUDFLARE_API_TOKEN,'Content-Type':'application/json'};
-          async function call(path,method='GET',body){
-            const r=await fetch('https://api.cloudflare.com/client/v4'+path,{method,headers,body:body?JSON.stringify(body):undefined});
-            const d=await r.json();
-            if(!r.ok||!d.success)throw new Error(method+' '+path+' failed: '+JSON.stringify(d.errors));
-            return d.result;
-          }
-          const zones=await call('/zones?name=auramenu.space');
-          const zone=zones.find(z=>z.name==='auramenu.space');
-          if(!zone)throw new Error('AuraMenu zone unavailable.');
-          const existing=await call('/zones/'+zone.id+'/workers/routes');
-          for(const route of config.routes.filter(r=>r.zone_name==='auramenu.space')){
-            const found=existing.find(r=>r.pattern===route.pattern);
-            if(found){
-              if(found.script!==config.name)throw new Error('Route already belongs to another Worker: '+route.pattern);
-              continue;
-            }
-            await call('/zones/'+zone.id+'/workers/routes','POST',{pattern:route.pattern,script:config.name});
-            console.log('Connected '+route.pattern);
-          }
-          console.log('AuraMenu account routes verified.');
-          JS
       - name: Deploy to Cloudflare
         run: npx wrangler deploy
         env:
