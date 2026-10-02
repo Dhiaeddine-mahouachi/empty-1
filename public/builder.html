@@ -42,7 +42,7 @@
             <label>Name<input name="title" maxlength="80" value="Your Business" required></label>
             <label>Address<input name="slug" maxlength="54" value="your-business" pattern="[a-zA-Z0-9-]{3,54}" required><small>aurapops.online/pops/your-business</small></label>
             <label class="wide">Short message<textarea name="subtitle" maxlength="180">Everything you need, one scan away.</textarea></label>
-            <label class="wide">Avatar / logo<input id="avatarInput" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG or WebP · max 420 KB</small></label>
+            <label class="wide">Avatar / logo<input id="avatarInput" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG or WebP · max 20 MB · automatically optimized</small></label>
           </div>
         </section>
 
@@ -60,7 +60,7 @@
             <label>Card<input name="cardColor" type="color" value="#111a16"></label>
             <label>Text<input name="textColor" type="color" value="#ffffff"></label>
             <label>Accent<input name="accentColor" type="color" value="#e1e100"></label>
-            <label class="wide" id="backgroundUploadWrap" hidden>Background image<input id="backgroundInput" type="file" accept="image/jpeg,image/png,image/webp"></label>
+            <label class="wide" id="backgroundUploadWrap" hidden>Background image<input id="backgroundInput" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG or WebP · max 20 MB · automatically optimized</small></label>
           </div>
         </section>
 
@@ -118,6 +118,6 @@
   </main>
 
   <footer><span>AuraPops</span><small>A standalone Aura product.</small></footer>
-  <script src="/aurapops/app.js"></script>
+  <script src="/aurapops/app.js?v=20261002-large-images"></script>
 </body>
 </html>
