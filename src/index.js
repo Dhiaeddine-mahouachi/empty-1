@@ -1,3 +1,4 @@
+import { CustomerError, ensureCustomers, customerSession, customerOwns, customerApi } from './customer.js';
 const MAX_BODY = 1400 * 1024;
 const IMAGE_BYTES = 420 * 1024;
 const IMAGE_CHARS = Math.ceil((IMAGE_BYTES * 4) / 3) + 64;
@@ -39,6 +40,10 @@ export default {
         response = await env.ASSETS.fetch(new Request(new URL("/index.html", url), request));
         return secure(response, request);
       }
+      if (['/login','/login/','/dashboard','/dashboard/'].includes(url.pathname)) {
+        response = await env.ASSETS.fetch(new Request(new URL('/account.html',url),request));
+        return secure(response,request);
+      }
       if (url.pathname === "/aurapops/admin" || url.pathname === "/aurapops/admin/") {
         response = await env.ASSETS.fetch(new Request(new URL("/admin.html", url), request));
         return secure(response, request);
@@ -62,7 +67,11 @@ export default {
       return secure(response, request);
     } catch (error) {
       console.error("aurapops_error", error?.name || "Error");
-      return secure(json({error: error instanceof AppError ? error.message : "Server error."}, error instanceof AppError ? error.status : 500), request);
+      if(new URL(request.url).pathname==='/api/aurapops/account/google/callback') {
+        const message=error instanceof CustomerError?error.message:'Google sign-in could not be completed. Please try again.';
+        return secure(Response.redirect(new URL('/login?error='+encodeURIComponent(message),request.url).toString(),302),request);
+      }
+      return secure(json({error: (error instanceof AppError || error instanceof CustomerError) ? error.message : "Server error."}, (error instanceof AppError || error instanceof CustomerError) ? error.status : 500), request);
     }
   }
 };
@@ -143,7 +152,7 @@ function secure(response, request) {
   } else if(!h.has("Content-Security-Policy")) {
     h.set("Content-Security-Policy","default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
   }
-  if(new URL(request.url).pathname.startsWith("/api/aurapops/admin/")) h.set("Cache-Control","no-store");
+  if(new URL(request.url).pathname.startsWith("/api/aurapops/")) h.set("Cache-Control","no-store");
   return new Response(response.body,{status:response.status,statusText:response.statusText,headers:h});
 }
 async function requestPolicy(request, env) {
@@ -169,6 +178,7 @@ async function ensureSchema(db) {
     db.prepare("CREATE TABLE IF NOT EXISTS aurapops_admin_sessions (token_hash TEXT PRIMARY KEY NOT NULL, expires_at TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now')))"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_aurapops_admin_sessions_expiry ON aurapops_admin_sessions(expires_at)")
   ]);
+  await ensureCustomers(db);
   schemaReady=true;
 }
 
@@ -238,6 +248,8 @@ async function replaceImage(db,popId,kind,dataUrl,currentId) {
   await db.batch(statements); return id;
 }
 async function ownerRow(request,db,id) {
+  if(await customerOwns(request,db,id)) return db.prepare("SELECT * FROM aurapops WHERE id=? LIMIT 1").bind(id).first();
+  if(await db.prepare("SELECT pop_id FROM aurapops_ownership WHERE pop_id=?").bind(id).first()) return null;
   const value=request.headers.get("X-AuraPop-Token")||"";
   if(!/^[a-f0-9]{64}$/i.test(value)) return null;
   const row=await db.prepare("SELECT * FROM aurapops WHERE id=? LIMIT 1").bind(id).first();
@@ -265,6 +277,8 @@ async function adminSession(request,db) {
 async function api(request,env) {
   await ensureSchema(env.DB);
   const url=new URL(request.url);
+
+  if(url.pathname.startsWith("/api/aurapops/account/")) return customerApi(request,env,mapPop);
 
   if(url.pathname==="/api/aurapops/health"&&request.method==="GET") return json({ok:true,service:"aurapops"});
 
@@ -339,9 +353,11 @@ async function api(request,env) {
     let allowed=image.status==="approved"&&image.payment_status==="paid";
     if(!allowed) {
       allowed=await adminSession(request,env.DB);
+      if(!allowed) allowed=await customerOwns(request,env.DB,image.pop_id);
       if(!allowed) {
         const owner=request.headers.get("X-AuraPop-Token")||"";
-        allowed=/^[a-f0-9]{64}$/i.test(owner)&&await hash(owner)===image.owner_token_hash;
+        const linked=await env.DB.prepare("SELECT pop_id FROM aurapops_ownership WHERE pop_id=?").bind(image.pop_id).first();
+        allowed=!linked&&/^[a-f0-9]{64}$/i.test(owner)&&await hash(owner)===image.owner_token_hash;
       }
     }
     if(!allowed) return new Response("Not found.",{status:404});
@@ -369,8 +385,10 @@ async function api(request,env) {
       const background=await replaceImage(env.DB,id,"background",p.backgroundData,null);
       await env.DB.prepare("UPDATE aurapops SET avatar_image_id=?,background_image_id=? WHERE id=?").bind(avatar,background,id).run();
     } catch(error) { await env.DB.prepare("DELETE FROM aurapops WHERE id=?").bind(id).run(); throw error; }
+    const customer=await customerSession(request,env.DB);
+    if(customer) await env.DB.prepare("INSERT INTO aurapops_ownership (pop_id,customer_id) VALUES (?,?)").bind(id,customer.id).run();
     const row=await env.DB.prepare("SELECT * FROM aurapops WHERE id=? LIMIT 1").bind(id).first();
-    return json({pop:mapPop(row,url.origin,true),token:raw},201,{"Cache-Control":"no-store"});
+    return json({pop:mapPop(row,url.origin,true),token:customer?null:raw},201,{"Cache-Control":"no-store"});
   }
 
   const ownerMatch=url.pathname.match(/^\/api\/aurapops\/pops\/([a-f0-9-]+)$/i);

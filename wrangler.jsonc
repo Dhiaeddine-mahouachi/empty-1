@@ -3,7 +3,9 @@
   "name": "aurapops",
   "main": "src/index.js",
   "compatibility_date": "2026-09-15",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "workers_dev": true,
   "preview_urls": true,
   "routes": [
@@ -32,7 +34,16 @@
     "directory": "./public",
     "binding": "ASSETS",
     "html_handling": "none",
-    "run_worker_first": ["/aurapops", "/aurapops/*", "/pops/*", "/api/aurapops/*"]
+    "run_worker_first": [
+      "/aurapops",
+      "/aurapops/*",
+      "/pops/*",
+      "/api/aurapops/*",
+      "/login",
+      "/login/",
+      "/dashboard",
+      "/dashboard/"
+    ]
   },
   "d1_databases": [
     {

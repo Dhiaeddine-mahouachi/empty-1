@@ -76,7 +76,7 @@
     return body;
   }
   async function privateImage(url){
-    if(!url||!state.token)return "";
+    if(!url)return "";
     const r=await fetch(url,{headers:{"X-AuraPop-Token":state.token}});if(!r.ok)return "";
     return URL.createObjectURL(await r.blob());
   }
@@ -90,7 +90,9 @@
   }
   async function restore(){
     let saved;try{saved=JSON.parse(localStorage.getItem(STORE)||"null");}catch{}
-    if(!saved?.id||!saved?.token)return;
+    const requested=new URLSearchParams(location.search).get("id");
+    if(requested) saved={id:requested,token:""};
+    if(!saved?.id)return;
     state.id=saved.id;state.token=saved.token;
     try{
       const r=await fetch(API+"/pops/"+encodeURIComponent(state.id),{headers:{"X-AuraPop-Token":state.token}});
@@ -101,7 +103,7 @@
       [...form.elements.backgroundMode].forEach(x=>x.checked=x.value===pop.backgroundMode);$("backgroundUploadWrap").hidden=pop.backgroundMode!=="image";
       revoke("avatarUrl");revoke("backgroundUrl");state.avatarUrl=await privateImage(pop.avatarUrl);state.backgroundUrl=await privateImage(pop.backgroundImageUrl);
       $("savePop").textContent="Save AuraPop changes";$("newPop").hidden=false;renderRows();renderPreview();showActivation(pop);notice("Draft restored.","success");
-    }catch{localStorage.removeItem(STORE);state.id="";state.token="";}
+    }catch{localStorage.removeItem(STORE);state.id="";state.token="";if(requested){notice("Sign in to edit this page.","error");$("savePop").disabled=true;}}
   }
 
   $("addLink").addEventListener("click",()=>add($("linkPreset").value));
@@ -110,17 +112,26 @@
   form.querySelectorAll('input[name="backgroundMode"]').forEach(x=>x.addEventListener("change",()=>{$("backgroundUploadWrap").hidden=form.elements.backgroundMode.value!=="image";renderPreview();}));
   $("avatarInput").addEventListener("change",async e=>{try{state.avatarData=await fileData(e.target.files?.[0]);revoke("avatarUrl");if(e.target.files?.[0])state.avatarUrl=URL.createObjectURL(e.target.files[0]);renderPreview();}catch(err){e.target.value="";notice(err.message,"error");}});
   $("backgroundInput").addEventListener("change",async e=>{try{state.backgroundData=await fileData(e.target.files?.[0]);revoke("backgroundUrl");if(e.target.files?.[0])state.backgroundUrl=URL.createObjectURL(e.target.files[0]);renderPreview();}catch(err){e.target.value="";notice(err.message,"error");}});
-  $("newPop").addEventListener("click",()=>{if(confirm("Start a new AuraPop? Your current AuraPop remains saved.")){localStorage.removeItem(STORE);location.reload();}});
+  $("newPop").addEventListener("click",()=>{if(confirm("Start a new AuraPop? Your current AuraPop remains saved.")){localStorage.removeItem(STORE);location.href="/builder.html";}});
   form.addEventListener("submit",async e=>{
     e.preventDefault();const btn=$("savePop");btn.disabled=true;notice(state.id?"Saving…":"Preparing…");
     try{
-      validate();const headers={"Content-Type":"application/json"};if(state.id)headers["X-AuraPop-Token"]=state.token;
+      validate();
+      let account=await (await fetch(API+"/account/session")).json();
+      if(!account.user){
+        const r=await fetch(API+"/account/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:$("customerName").value,email:$("customerEmail").value,password:$("customerPassword").value})});
+        const d=await r.json();if(!r.ok)throw new Error(d.error||"Could not create your account.");account=d;$("customerPassword").value="";
+      }
+      $("customerAccountFields").hidden=true;$("signedInCustomer").hidden=false;$("signedInCustomer").textContent="Saving to "+account.user.name+"’s account.";
+      if(state.id&&state.token){const claim=await fetch(API+"/account/claim",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:state.id,token:state.token})});if(!claim.ok)throw new Error("This page could not be linked to your account.");state.token="";localStorage.removeItem(STORE);}
+      const headers={"Content-Type":"application/json"};if(state.id)headers["X-AuraPop-Token"]=state.token;
       const r=await fetch(state.id?API+"/pops/"+encodeURIComponent(state.id):API+"/pops",{method:state.id?"PATCH":"POST",headers,body:JSON.stringify(payload())});
       const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||"Could not save AuraPop.");
-      if(!state.id){state.id=data.pop.id;state.token=data.token;localStorage.setItem(STORE,JSON.stringify({id:state.id,token:state.token}));form.elements.slug.value=data.pop.slug;form.elements.slug.readOnly=true;$("newPop").hidden=false;$("savePop").textContent="Save AuraPop changes";}
+      if(!state.id){state.id=data.pop.id;state.token=data.token||"";localStorage.removeItem(STORE);history.replaceState(null,"","/builder.html?id="+encodeURIComponent(state.id));form.elements.slug.value=data.pop.slug;form.elements.slug.readOnly=true;$("newPop").hidden=false;$("savePop").textContent="Save AuraPop changes";}
       state.avatarData=undefined;state.backgroundData=undefined;showActivation(data.pop);notice("Saved. Your QR is ready.","success");activation.scrollIntoView({behavior:"smooth",block:"nearest"});
     }catch(err){notice(err.message,"error");}finally{btn.disabled=false;}
   });
 
   renderRows();renderPreview();restore();
+  fetch(API+"/account/session").then(r=>r.json()).then(d=>{if(d.user){$("customerAccountFields").hidden=true;$("signedInCustomer").hidden=false;$("signedInCustomer").textContent="Signed in as "+d.user.name+" · "+d.user.email;}}).catch(()=>{});
 })();

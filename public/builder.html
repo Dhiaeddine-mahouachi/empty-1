@@ -15,7 +15,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="/"><img class="brand-mark" src="/brand/aurapops-mark.png" alt="" width="48" height="25"><span><b>Aura</b>Pops</span></a>
-    <a class="admin-link" href="/">← Home</a>
+    <a class="admin-link" href="/dashboard">My dashboard</a>
   </header>
 
   <main>
@@ -80,7 +80,14 @@
         </section>
 
         <section class="step">
-          <div class="step-title"><b>04</b><span>Prepare QR</span></div>
+          <div class="step-title"><b>04</b><span>Your account & QR</span></div>
+          <div id="customerAccountFields" class="fields">
+            <p class="wide">Create your account to keep this page and manage it from any device. Already registered? <a href="/login" target="_blank" rel="noopener">Sign in in a new tab</a>, then save your page here.</p>
+            <label>Your name<input id="customerName" autocomplete="name" maxlength="80"></label>
+            <label>Email<input id="customerEmail" type="email" autocomplete="email" maxlength="254"></label>
+            <label class="wide">Choose a password<input id="customerPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128"><small>At least 10 characters.</small></label>
+          </div>
+          <p id="signedInCustomer" hidden></p>
           <div class="submit-row">
             <button class="primary" id="savePop" type="submit">Prepare AuraPop & QR</button>
             <span id="builderStatus"></span>
@@ -104,7 +111,7 @@
 
         <section class="activation" id="activationPanel">
           <div class="activation-head"><div><b>Your permanent QR is ready.</b><small id="activationText">Complete payment to activate it.</small></div><span id="activationStatus">Pending</span></div>
-          <div class="qr-row"><img id="popQr" alt="AuraPop QR code"><div><a id="publicLink" target="_blank" rel="noopener"></a><p>The URL and QR never change after activation.</p></div></div>
+          <div class="qr-row"><img id="popQr" alt="AuraPop QR code"><div><a id="publicLink" target="_blank" rel="noopener"></a><p>The URL and QR never change after activation.</p><a href="/dashboard">Go to my dashboard →</a></div></div>
         </section>
       </aside>
     </section>
