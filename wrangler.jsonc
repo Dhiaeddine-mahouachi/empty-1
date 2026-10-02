@@ -105,6 +105,8 @@
       "/api/aurapops/*",
       "/login",
       "/login/",
+      "/admin",
+      "/admin/",
       "/dashboard",
       "/dashboard/",
       "/account",
