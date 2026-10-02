@@ -44,3 +44,25 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-off
 @media(max-width:760px){.shell{width:min(calc(100% - 24px),var(--max))}.topbar{top:8px;margin-top:8px;height:64px;padding:0 14px}.nav{display:none;position:absolute;top:72px;left:0;right:0;padding:15px;border:1px solid var(--line);border-radius:18px;background:#07130e;flex-direction:column;align-items:stretch;gap:4px}.nav.open{display:flex}.nav a{padding:11px 6px}.top-actions .text-link{display:none}.top-actions .cta{display:none}.menu-toggle{display:block}.brand{font-size:1rem}.ap-mark{width:36px;height:22px}.hero{gap:26px;padding-block:46px 28px}.hero-copy h1{font-size:clamp(4rem,18vw,6.4rem)}.hero-copy h2{font-size:clamp(2rem,9vw,3rem)}.hero-copy>p{font-size:.93rem}.hero-stage{min-height:390px;border-radius:24px}.hero-stage img{min-height:390px}.hero-buttons{display:grid}.hero-buttons .cta{width:100%}.hero-notes{gap:10px 14px}.feature-section{padding-bottom:46px}.feature-grid{grid-template-columns:1fr}.feature-card{min-height:185px}.how{padding:14px;border-radius:22px}.how-media{height:300px;border-radius:17px}.how-copy{padding:16px 7px}.experience{padding:60px 0 44px}.benefits{grid-template-columns:1fr 1fr}.pricing-head{align-items:flex-start;flex-direction:column}.pricing-cards{grid-template-columns:1fr}.price-card:last-child{grid-column:auto}.final-cta{padding:27px 22px;display:grid;border-radius:22px}.final-cta .cta{width:100%}.footer{grid-template-columns:1fr;justify-items:start}.footer-links{flex-wrap:wrap;justify-content:flex-start}.footer small{grid-row:auto}}
 @media(max-width:420px){.hero-stage{min-height:330px}.hero-stage img{min-height:330px}.benefits{grid-template-columns:1fr}.feature-card{padding:20px}.price-card{min-height:350px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.cta,.feature-card{transition:none}}
+
+/* AuraPops visual showcase — 2026-10-02 */
+.hero-stage{min-height:0;aspect-ratio:460/266;align-items:center}
+.hero-stage img{min-height:0;width:100%;height:100%;object-fit:cover}
+.product-visuals{display:grid;grid-template-columns:1.08fr .92fr;gap:14px;margin-top:14px}
+.visual-panel{margin:0;min-height:100%;padding:10px;border:1px solid var(--line);border-radius:24px;overflow:hidden;background:linear-gradient(145deg,rgba(12,29,20,.86),rgba(7,18,12,.94));display:flex;align-items:center}
+.visual-panel img{width:100%;height:auto;border-radius:17px}
+.visual-panel-ready{background:radial-gradient(circle at 80% 60%,rgba(223,255,105,.08),transparent 35%),linear-gradient(145deg,rgba(12,29,20,.86),rgba(7,18,12,.94))}
+.use-cases{padding:18px 0 76px}
+.use-cases-copy{max-width:760px;margin-bottom:25px}
+.use-cases-copy h2{font-size:clamp(2.5rem,4.6vw,5rem);line-height:.98;letter-spacing:-.065em;margin:12px 0 14px}
+.use-cases-copy p{margin:0;color:#9fad9f;line-height:1.65;max-width:660px}
+.use-cases-board{padding:10px;border:1px solid var(--line);border-radius:28px;overflow:hidden;background:linear-gradient(145deg,rgba(12,29,20,.86),rgba(7,18,12,.94));box-shadow:0 28px 80px rgba(0,0,0,.16)}
+.use-cases-board img{width:100%;height:auto;border-radius:20px}
+@media(max-width:760px){
+  .product-visuals{grid-template-columns:1fr}
+  .visual-panel{padding:7px;border-radius:19px}
+  .visual-panel img{border-radius:13px}
+  .use-cases{padding-bottom:50px}
+  .use-cases-board{padding:6px;border-radius:20px;overflow-x:auto}
+  .use-cases-board img{width:760px;max-width:none;border-radius:15px}
+}
