@@ -50,7 +50,7 @@ export default {
         response = await env.ASSETS.fetch(new Request(new URL('/account.html',url),request));
         return secure(response,request);
       }
-      if (url.pathname === "/aurapops/admin" || url.pathname === "/aurapops/admin/") {
+      if (["/admin","/admin/","/aurapops/admin","/aurapops/admin/"].includes(url.pathname)) {
         response = await env.ASSETS.fetch(new Request(new URL("/admin.html", url), request));
         return secure(response, request);
       }
