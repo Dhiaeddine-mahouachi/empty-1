@@ -1,3 +1,4 @@
+import { activationMail } from './service-mail.js';
 import { handleMenuAccounts } from './menu-accounts.js';
 import { CustomerError, ensureCustomers, customerSession, customerOwns, customerApi } from './customer.js';
 const MAX_BODY = 1400 * 1024;
@@ -154,7 +155,7 @@ function secure(response, request) {
   h.set("Referrer-Policy","no-referrer");
   h.set("Permissions-Policy","camera=(), microphone=(), geolocation=()");
   if((h.get("Content-Type")||"").includes("text/html")) {
-    h.set("Content-Security-Policy","default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://api.qrserver.com https://auradigitalworks.com https://images.unsplash.com; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests");
+    h.set("Content-Security-Policy","default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://api.qrserver.com https://auradigitalworks.com https://images.unsplash.com; connect-src 'self' https://auradigitalworks.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests");
   } else if(!h.has("Content-Security-Policy")) {
     h.set("Content-Security-Policy","default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
   }
@@ -343,8 +344,10 @@ async function api(request,env) {
       const note=body.adminNote===undefined?current.admin_note:clean(body.adminNote,500);
       const approvedAt=status==="approved"?(current.approved_at||new Date().toISOString()):null;
 
-      await env.DB.prepare("UPDATE aurapops SET status=?,payment_status=?,admin_note=?,approved_at=?,updated_at=datetime('now') WHERE id=?")
-        .bind(status,payment,note,approvedAt,m[1]).run();
+      const notification=await activationMail(env.DB,'pop',current,{...current,status,payment_status:payment,approved_at:approvedAt});
+      const update=env.DB.prepare("UPDATE aurapops SET status=?,payment_status=?,admin_note=?,approved_at=?,updated_at=datetime('now') WHERE id=?")
+        .bind(status,payment,note,approvedAt,m[1]);
+      await env.DB.batch(notification?[update,notification]:[update]);
 
       const updated=await env.DB.prepare("SELECT * FROM aurapops WHERE id=? LIMIT 1").bind(m[1]).first();
       return json({pop:mapPop(updated,url.origin,true)},200,{"Cache-Control":"no-store"});
