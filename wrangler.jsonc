@@ -94,6 +94,7 @@
       "zone_name": "auramenu.space"
     }
   ],
+  "triggers": { "crons": ["*/5 * * * *"] },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
@@ -102,6 +103,7 @@
       "/aurapops",
       "/aurapops/*",
       "/pops/*",
+      "/api/support/*",
       "/api/aurapops/*",
       "/login",
       "/login/",

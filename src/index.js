@@ -1,4 +1,4 @@
-import { activationMail } from './service-mail.js';
+import { activationMail, handleSupport, deliverMail } from './service-mail.js';
 import { handleMenuAccounts } from './menu-accounts.js';
 import { CustomerError, ensureCustomers, customerSession, customerOwns, customerApi } from './customer.js';
 const MAX_BODY = 1400 * 1024;
@@ -17,11 +17,17 @@ const AURAPOPS_SESSION_MAX_AGE = 60 * 60 * 24 * 14;
 let schemaReady = false;
 
 export default {
-  async fetch(request, env) {
+  async scheduled(event, env, ctx) { ctx.waitUntil(deliverMail(env)); },
+  async fetch(request, env, ctx) {
     try {
       const policy = await requestPolicy(request, env);
       if (policy) return secure(policy, request);
 
+      const support = await handleSupport(request, env);
+      if (support) {
+        if (support.ok && request.method === 'POST' && ctx?.waitUntil) ctx.waitUntil(deliverMail(env).catch(() => console.error('aura_mail_retry_failed')));
+        return secure(support, request);
+      }
       const url = new URL(request.url);
       let response;
       const menuHost=['auramenu.space','www.auramenu.space'].includes(url.hostname);
@@ -61,6 +67,7 @@ export default {
       }
       if (url.pathname.startsWith("/api/aurapops/") || url.pathname === "/api/aurapops") {
         response = await api(request, env);
+        if (response.ok && request.method === 'PATCH' && ctx?.waitUntil) ctx.waitUntil(deliverMail(env).catch(() => console.error('aura_mail_retry_failed')));
         return secure(response, request);
       }
       if (url.pathname.startsWith("/aurapops/")) {

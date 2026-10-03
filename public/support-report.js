@@ -30,7 +30,7 @@
       submit.disabled=true;submit.textContent=c[5];status.textContent='';
       try {
         const page=new URL(location.href);page.search='';page.hash='';
-        const response=await fetch('https://auradigitalworks.com/api/support/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:form.elements.email.value,problem:form.elements.problem.value,website:form.elements.website.value,page:page.href}),signal:AbortSignal.timeout(20000)});
+        const response=await fetch('https://aurapops.online/api/support/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:form.elements.email.value,problem:form.elements.problem.value,website:form.elements.website.value,page:page.href}),signal:AbortSignal.timeout(20000)});
         const data=await response.json();if(!response.ok)throw new Error(data.error||c[7]);
         form.reset();status.textContent=c[6]+' '+data.reference;status.dataset.success='true';
       }catch(error){status.textContent=error.name==='TimeoutError'?c[7]:error.message||c[7];delete status.dataset.success;}

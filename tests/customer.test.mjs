@@ -87,3 +87,9 @@ test('saved images return exact binary bytes for owner preview and public pop, n
  for(const url of [pop.avatarUrl,pop.backgroundImageUrl]){const response=await image(url);assert.equal(response.status,200);assert.deepEqual(Buffer.from(await response.arrayBuffer()),png);const head=await image(url,'','HEAD');assert.equal(head.status,200);assert.equal(head.headers.get('Content-Length'),String(png.length));assert.equal((await head.arrayBuffer()).byteLength,0);}
  sql.prepare("UPDATE aurapops SET status='pending' WHERE id=?").run(pop.id);assert.equal((await image(pop.avatarUrl)).status,404);
 });
+test('shared report endpoint accepts reports from AuraDigital and queues both notification emails',async()=>{
+ const r=await call('/api/support/report','POST',{email:'reporter@example.com',problem:'The menu image is missing on my phone.',page:'https://auradigitalworks.com/contact'},'',{Origin:'https://auradigitalworks.com'});
+ assert.equal(r.status,202);assert.equal(r.headers.get('Access-Control-Allow-Origin'),'https://auradigitalworks.com');
+ const {reference}=await r.json();const rows=sql.prepare("SELECT payload FROM aura_mail_outbox WHERE id LIKE ?").all('support/%/'+reference);
+ assert.equal(rows.length,2);const mails=rows.map(x=>JSON.parse(x.payload));assert.ok(mails.some(x=>x.to[0]==='info@auradigitalworks.com'));assert.ok(mails.some(x=>x.to[0]==='reporter@example.com'));
+});
