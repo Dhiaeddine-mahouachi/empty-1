@@ -2,6 +2,7 @@
   if (window.auraSupportInstalled) return;
   window.auraSupportInstalled = true;
   function boot() {
+    if (window.self !== window.top && new URLSearchParams(location.search).get('embedded') === '1') return;
     const lang = (document.documentElement.lang || 'en').split('-')[0];
     const translations = {
       en: ['Report a problem','Your email','Describe the problem','Send report','Close','Sending…','Report received. We’re processing it. A confirmation email will follow.','Please try again or email info@auradigitalworks.com.'],
