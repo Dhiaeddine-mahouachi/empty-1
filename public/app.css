@@ -43,3 +43,4 @@ footer{width:min(calc(100% - 32px),var(--max));margin:auto;padding:28px 0;border
 .preview-link{width:100%;color:var(--ptext);text-align:left;font-family:inherit}.preview-link[data-preview-type=snake],.preview-link[data-preview-type=tetris]{cursor:pointer}.preview-link:focus-visible{outline:2px solid var(--paccent);outline-offset:2px}
 
 .preview h3{text-align:center;overflow-wrap:anywhere}.preview-link span{min-width:0;overflow-wrap:anywhere}.preview-link i{flex-shrink:0}
+ .preview-inner>.avatar{flex-shrink:0}
