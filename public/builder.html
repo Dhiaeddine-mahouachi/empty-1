@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#06110d">
   <title>AuraPops Studio — Build your smart QR popup</title>
   <meta name="description" content="Create a branded QR popup with avatar, links, maps, menus and playable Snake or Tetris.">
-  <link rel="stylesheet" href="/aurapops/app.css?v=20261003">
+  <link rel="stylesheet" href="/aurapops/app.css?v=20261004-popup">
   <link rel="icon" type="image/x-icon" href="/favicon.ico?v=20261002">
   <link rel="icon" type="image/png" sizes="32x32" href="/brand/icon-32.png?v=20261002">
   <link rel="apple-touch-icon" sizes="180x180" href="/brand/icon-180.png">
@@ -102,12 +102,16 @@
         <h2>Exactly what the QR opens.</h2>
         <div class="phone">
           <div class="preview" id="previewCard">
-            <div class="preview-inner">
+            <section class="preview-popup" id="previewPopup" aria-label="AuraPop preview">
+              <button class="popup-close" id="closePreview" type="button" aria-label="Close preview popup">×</button>
+              <div class="preview-inner">
               <div class="avatar" id="previewAvatar"><span>AP</span></div>
               <h3 id="previewTitle">Your Business</h3>
               <p id="previewSubtitle">Everything you need, one scan away.</p>
               <div id="previewLinks" class="preview-links"><div class="empty">Add your first item.</div></div>
             </div>
+            </section>
+            <button class="popup-open" id="openPreview" type="button" hidden>Open AuraPop</button>
           </div>
         </div>
 
@@ -120,7 +124,7 @@
   </main>
 
   <footer><span>AuraPops</span><small>A standalone Aura product.</small></footer>
-  <script type="module" src="/aurapops/app.js?v=20261003"></script>
+  <script type="module" src="/aurapops/app.js?v=20261004-popup"></script>
 <link rel="stylesheet" href="/support-report.css?v=2">
 <script src="/support-report.js?v=2" defer></script>
 </body>

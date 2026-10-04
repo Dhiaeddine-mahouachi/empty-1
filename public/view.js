@@ -1,12 +1,17 @@
 import {openGame} from './games.js?v=20261003';
 (() => {
   const shell=document.getElementById("shell"),card=document.getElementById("popCard"),loading=document.getElementById("loadingState"),links=document.getElementById("links"),avatar=document.getElementById("avatar");
+  const open=document.getElementById("openPop");
+  document.getElementById("closePop").addEventListener("click",()=>card.close());
+  open.addEventListener("click",()=>card.showModal());
+  card.addEventListener("close",()=>{open.hidden=false;open.focus();});
+  card.addEventListener("click",e=>{if(e.target!==card)return;const r=card.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)card.close();});
   const icons={website:"↗",menu:"☰",instagram:"IG",facebook:"f",tiktok:"♪",whatsapp:"WA",maps:"⌖",custom:"↗",snake:"S",tetris:"T"};
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
   const initials=v=>String(v||"AuraPop").split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
 
   function inactive(message="This AuraPop is not active yet."){
-    card.hidden=true;loading.hidden=false;loading.innerHTML=`<h1>AuraPop is waiting for activation.</h1><p>${esc(message)}</p><a href="/aurapops">Open AuraPops Studio →</a>`;
+    if(card.open)card.close();open.hidden=true;loading.hidden=false;loading.innerHTML=`<h1>AuraPop is waiting for activation.</h1><p>${esc(message)}</p><a href="/aurapops">Open AuraPops Studio →</a>`;
   }
   async function load(){
     const m=location.pathname.match(/^\/pops\/([a-z0-9-]+)$/i);if(!m)return inactive("Invalid AuraPop address.");
@@ -24,7 +29,7 @@ import {openGame} from './games.js?v=20261003';
       return `<a class="link" href="${esc(item.url)}" target="_blank" rel="noopener noreferrer"><span class="icon">${esc(icons[type]||"↗")}</span><span>${esc(item.label||"Open link")}</span><small>Open ↗</small></a>`;
     }).join("")||'<div class="link"><span class="icon">AP</span><span>No items yet</span></div>';
     links.querySelectorAll("[data-game]").forEach(b=>b.addEventListener("click",()=>openGame(b.dataset.game)));
-    loading.hidden=true;card.hidden=false;
+    loading.hidden=true;open.hidden=false;card.showModal();
   }
 
   load();

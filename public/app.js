@@ -87,6 +87,8 @@ import {openGame} from './games.js?v=20261003';
     else {const ini=title.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase()||"AP";avatar.innerHTML=`<span>${esc(ini)}</span>`;}
     previewLinks.innerHTML=state.links.length?state.links.map(item=>`<button type="button" class="preview-link" data-preview-type="${esc(item.type)}"><i>${esc(presets[item.type]?.[1]||"↗")}</i><span>${esc(item.label||"Open")}</span></button>`).join(""):'<div class="empty">Add your first item.</div>';
   }
+  $("closePreview").addEventListener("click",()=>{$("previewPopup").hidden=true;$("openPreview").hidden=false;$("openPreview").focus();});
+  $("openPreview").addEventListener("click",()=>{$("previewPopup").hidden=false;$("openPreview").hidden=true;$("closePreview").focus();});
   previewLinks.addEventListener("click",e=>{const type=e.target.closest("[data-preview-type]")?.dataset.previewType;if(isGame(type))openGame(type);});
   function validate(){
     if(!String(form.elements.title.value||"").trim())throw new Error("Add a name.");
